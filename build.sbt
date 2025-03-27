@@ -22,33 +22,54 @@ lazy val core = (projectMatrix in file("core"))
   .jvmPlatform(Seq(scala3Version))
   .jsPlatform(Seq(scala3Version))
   .settings(
-    scalaJSUseMainModuleInitializer := true,
+    scalaJSUseMainModuleInitializer := false,
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }
   )
 
 lazy val coreJVM = core.jvm(scala3Version)
 lazy val coreJS  = core.js(scala3Version)
 
-lazy val rendererJS = (project in file("rendererJS"))
+lazy val rendererJS = (project in file("renderer/js"))
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(coreJS)
   .settings(
     commonSettings,
     name                            := "florence-renderer-js",
-    scalaJSUseMainModuleInitializer := true,
+    scalaJSUseMainModuleInitializer := false,
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) },
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.8.0"
   )
 
-lazy val rendererJVM = (project in file("rendererJVM"))
+lazy val rendererJVM = (project in file("renderer/jvm"))
   .dependsOn(coreJVM)
   .settings(
     commonSettings,
     name := "florence-renderer-jvm"
   )
 
+lazy val sandboxJS = (project in file("sandbox/js"))
+  .enablePlugins(ScalaJSPlugin)
+  .dependsOn(rendererJS)
+  .settings(
+    commonSettings,
+    name                            := "florence-sandbox-js",
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSMainModuleInitializer := Some(
+      org.scalajs.linker.interface.ModuleInitializer
+        .mainMethod("florence.examples.js.Example", "main")
+    ),
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }
+  )
+
+lazy val sandboxJVM = (project in file("sandbox/jvm"))
+  .dependsOn(rendererJVM)
+  .settings(
+    commonSettings,
+    name := "florence-sandbox-jvm"
+  )
+
 lazy val root = (project in file("."))
-  .aggregate(coreJVM, coreJS, rendererJS, rendererJVM)
+  .aggregate(coreJVM, coreJS, rendererJS, rendererJVM, sandboxJS, sandboxJVM)
   .settings(
     commonSettings,
     name           := "florence",

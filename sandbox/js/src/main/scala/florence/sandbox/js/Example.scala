@@ -1,19 +1,12 @@
-package florence.renderer.js
+package florence.sandbox.js
 
 import org.scalajs.dom
 import org.scalajs.dom.{HTMLCanvasElement, document}
 
-import florence.core.dsl.LineChartDsl
-import florence.core.dsl.LineChartDsl.*
-import florence.core.dsl.styling.*
-import florence.core.dsl.styling.ChartStylingDsl.*
-import florence.core.dsl.styling.LineChartStylingDsl.*
-import florence.core.model.*
-import florence.core.model.shared.*
-import florence.core.model.styling.*
-import florence.core.model.styling.given
-import florence.core.rendering.*
-import florence.core.rendering.LineChartInterpreterInstances.given
+import florence.*
+import florence.instances.given
+import florence.renderer.js.*
+import florence.renderer.js.instances.given
 
 object Example:
 
@@ -103,7 +96,7 @@ object Example:
       (1.0, 1.4),
       (2.0, 2.8)
     )
-    val chartSpec =
+    val chart =
       lineChart(
         "Heathrow Min & Max Temps (2023–2025)",
         pointsSeries("TMax 2023", tmax2023*),
@@ -114,12 +107,12 @@ object Example:
         pointsSeries("TMin 2025", tmin2025*)
       )
         .withXAxis(
-          AxisSpec.CategoryScale(
+          AxisDef.CategoryScale(
             "Month",
             categories = Some(Vector("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"))
           )
         )
-        .withYAxis(AxisSpec.LinearScale("Temperature (°C)", None, None))
+        .withYAxis(AxisDef.LinearScale("Temperature (°C)", None, None))
     val style = lineChartStyle()
       .withDefaultSeriesStyle(
         LineSeriesStyle(
@@ -175,8 +168,7 @@ object Example:
       .withWidth(800)
       .withHeight(400)
       .withMargins(Margins(40, 80, 50, 110))
-    val styledSpec = chartSpec.withStyling(style)
-    val drawing    = Interpreters.interpret(styledSpec)
-    canvas.render(drawing)
+    val styledChart = chart.withStyling(style)
+    styledChart.renderTo(canvas.getContext2D())
   end renderChart
 end Example

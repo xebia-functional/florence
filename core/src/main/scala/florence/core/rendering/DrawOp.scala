@@ -1,6 +1,6 @@
 package florence.core.rendering
 
-import florence.core.model.shared.*
+import florence.core.model.shared.StyleTypes.*
 
 final case class ClearOp(colour: Option[String] = None)
 

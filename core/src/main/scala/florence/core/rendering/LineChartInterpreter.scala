@@ -2,26 +2,29 @@ package florence.core.rendering
 
 import scala.collection.mutable
 
-import florence.core.dsl.styling.*
+import florence.core.dsl.styling.LineChartStylingDsl.*
 import florence.core.model.*
-import florence.core.model.shared.*
+import florence.core.model.ChartDef.LineChart
+import florence.core.model.shared.StyleTypes.*
 import florence.core.model.styling.*
-import florence.core.model.styling.given
+import florence.core.model.styling.ChartStyleDef.LineChartStyle
+import florence.core.model.styling.WithCommonProps.*
+import florence.core.model.styling.WithCommonProps.given
 
 object LineChartInterpreter:
 
-  def interpretLineChart[A](
-      spec: LineChartSpec[A],
-      style: LineChartStyleSpec = LineChartStyleSpec()
+  def interpretLineChart(
+      chart: LineChart,
+      style: LineChartStyle = LineChartStyle()
   ): Drawing =
-    val chartSetup = setupChart(spec, style)
+    val chartSetup = setupChart(chart, style)
     val operations = Vector.newBuilder[DrawOp]
     operations ++= drawBackground(chartSetup, style)
-    operations ++= drawTitle(spec, chartSetup, style)
-    operations ++= drawAxes(spec, chartSetup, style)
-    operations ++= drawGridAndLabels(spec, chartSetup, style)
-    operations ++= drawSeries(spec, chartSetup, style)
-    operations ++= drawLegend(spec, chartSetup, style)
+    operations ++= drawTitle(chart, chartSetup, style)
+    operations ++= drawAxes(chart, chartSetup, style)
+    operations ++= drawGridAndLabels(chart, chartSetup, style)
+    operations ++= drawSeries(chart, chartSetup, style)
+    operations ++= drawLegend(chart, chartSetup, style)
     Drawing(operations.result().toList)
 
   private case class ChartSetup(
@@ -41,34 +44,34 @@ object LineChartInterpreter:
     def transformY(y: Double): Double =
       height - margins.bottom - (y - yMin) * plotHeight / (yMax - yMin)
 
-  private def setupChart[A](
-      spec: LineChartSpec[A],
-      style: LineChartStyleSpec
+  private def setupChart(
+      chart: LineChart,
+      style: LineChartStyle
   ): ChartSetup =
     val width                                    = style.width
     val height                                   = style.height
     val margins                                  = style.margins
     val plotWidth                                = width - margins.left - margins.right
     val plotHeight                               = height - margins.top - margins.bottom
-    val (dataXMin, dataXMax, dataYMin, dataYMax) = calculateDataRanges(spec)
-    val (xMin, xMax)                             = computeAxisRange(spec.xAxis, dataXMin, dataXMax)
-    val (yMin, yMax)                             = computeAxisRange(spec.yAxis, dataYMin, dataYMax)
+    val (dataXMin, dataXMax, dataYMin, dataYMax) = calculateDataRanges(chart)
+    val (xMin, xMax)                             = computeAxisRange(chart.xAxis, dataXMin, dataXMax)
+    val (yMin, yMax)                             = computeAxisRange(chart.yAxis, dataYMin, dataYMax)
     ChartSetup(width, height, margins, xMin, xMax, yMin, yMax, plotWidth, plotHeight)
 
-  private def computeAxisRange(axis: AxisSpec, dataMin: Double, dataMax: Double): (Double, Double) =
+  private def computeAxisRange(axis: AxisDef, dataMin: Double, dataMax: Double): (Double, Double) =
     axis match
-      case AxisSpec.LinearScale(_, min, max) =>
+      case AxisDef.LinearScale(_, min, max) =>
         // Use provided min/max or fallback to data ranges
         (min.getOrElse(dataMin), max.getOrElse(dataMax))
-      case AxisSpec.CategoryScale(_, categories) =>
+      case AxisDef.CategoryScale(_, categories) =>
         // Axis padding: extra 5% on both sides of the axis
         val categoryCount = categories.map(_.size).getOrElse(0)
         val padding       = Math.max(0.5, categoryCount * 0.05)
         (1.0 - padding, categoryCount + padding)
 
-  private def calculateDataRanges[A](spec: LineChartSpec[A]): (Double, Double, Double, Double) =
-    if spec.series.isEmpty then return (0.0, 100.0, 0.0, 100.0)
-    val allPoints = spec.series.flatMap(getSeriesPoints)
+  private def calculateDataRanges(chart: LineChart): (Double, Double, Double, Double) =
+    if chart.series.isEmpty then return (0.0, 100.0, 0.0, 100.0)
+    val allPoints = chart.series.flatMap(getSeriesPoints)
     if allPoints.isEmpty then return (0.0, 100.0, 0.0, 100.0)
     val xValues = allPoints.map(_._1)
     val yValues = allPoints.map(_._2)
@@ -94,18 +97,18 @@ object LineChartInterpreter:
 
   private def drawBackground(
       setup: ChartSetup,
-      style: LineChartStyleSpec
+      style: LineChartStyle
   ): Vector[DrawOp] =
     val bgColour = style.background.colour
     Vector(ClearOp(Some(bgColour)))
 
-  private def drawTitle[A](
-      spec: LineChartSpec[A],
+  private def drawTitle(
+      chart: LineChart,
       setup: ChartSetup,
-      style: LineChartStyleSpec
+      style: LineChartStyle
   ): Vector[DrawOp] =
     val result = Vector.newBuilder[DrawOp]
-    spec.title.foreach { title =>
+    chart.title.foreach { title =>
       val titleStyle = style.title
       result += TextOp(
         text = title,
@@ -122,10 +125,10 @@ object LineChartInterpreter:
     }
     result.result()
 
-  private def drawAxes[A](
-      spec: LineChartSpec[A],
+  private def drawAxes(
+      chart: LineChart,
       setup: ChartSetup,
-      style: LineChartStyleSpec
+      style: LineChartStyle
   ): Vector[DrawOp] =
     val result      = Vector.newBuilder[DrawOp]
     val xAxisColour = style.xAxis.lineColour.getOrElse("black")
@@ -152,13 +155,13 @@ object LineChartInterpreter:
     val xLabelFont = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 12.0, "normal"))
     val yLabelFont = style.yAxis.labelFont.getOrElse(FontSpec("sans-serif", 12.0, "normal"))
 
-    val xAxisLabel = spec.xAxis match
-      case AxisSpec.LinearScale(label, _, _) => label
-      case AxisSpec.CategoryScale(label, _)  => label
+    val xAxisLabel = chart.xAxis match
+      case AxisDef.LinearScale(label, _, _) => label
+      case AxisDef.CategoryScale(label, _)  => label
 
-    val yAxisLabel = spec.yAxis match
-      case AxisSpec.LinearScale(label, _, _) => label
-      case AxisSpec.CategoryScale(label, _)  => label
+    val yAxisLabel = chart.yAxis match
+      case AxisDef.LinearScale(label, _, _) => label
+      case AxisDef.CategoryScale(label, _)  => label
 
     result += TextOp(
       xAxisLabel,
@@ -195,35 +198,35 @@ object LineChartInterpreter:
     result.result()
   end drawAxes
 
-  private def drawGridAndLabels[A](
-      spec: LineChartSpec[A],
+  private def drawGridAndLabels(
+      chart: LineChart,
       setup: ChartSetup,
-      style: LineChartStyleSpec
+      style: LineChartStyle
   ): Vector[DrawOp] =
     val result = Vector.newBuilder[DrawOp]
-    if style.xAxis.gridLines then drawXAxisElements(spec, setup, style, result)
-    if style.yAxis.gridLines then drawYAxisElements(spec, setup, style, result)
+    if style.xAxis.gridLines then drawXAxisElements(chart, setup, style, result)
+    if style.yAxis.gridLines then drawYAxisElements(chart, setup, style, result)
     result.result()
 
-  private def drawXAxisElements[A](
-      spec: LineChartSpec[A],
+  private def drawXAxisElements(
+      chart: LineChart,
       setup: ChartSetup,
-      style: LineChartStyleSpec,
+      style: LineChartStyle,
       result: mutable.ReusableBuilder[DrawOp, Vector[DrawOp]]
   ): Unit =
-    spec.xAxis match
-      case AxisSpec.CategoryScale(_, Some(categories)) =>
+    chart.xAxis match
+      case AxisDef.CategoryScale(_, Some(categories)) =>
         drawCategoricalXAxis(categories, setup, style, result)
-      case AxisSpec.CategoryScale(_, None) =>
+      case AxisDef.CategoryScale(_, None) =>
         drawAutoCategoricalXAxis(setup, style, result)
-      case AxisSpec.LinearScale(_, _, _) =>
+      case AxisDef.LinearScale(_, _, _) =>
         drawNumericXAxis(setup, style, result)
   end drawXAxisElements
 
   private def drawCategoricalXAxis(
       categories: Vector[String],
       setup: ChartSetup,
-      style: LineChartStyleSpec,
+      style: LineChartStyle,
       result: mutable.ReusableBuilder[DrawOp, Vector[DrawOp]]
   ): Unit =
     val xAxisColour = style.xAxis.lineColour.getOrElse("black")
@@ -242,7 +245,7 @@ object LineChartInterpreter:
 
   private def drawAutoCategoricalXAxis(
       setup: ChartSetup,
-      style: LineChartStyleSpec,
+      style: LineChartStyle,
       result: mutable.ReusableBuilder[DrawOp, Vector[DrawOp]]
   ): Unit =
     val xAxisColour = style.xAxis.lineColour.getOrElse("black")
@@ -262,7 +265,7 @@ object LineChartInterpreter:
 
   private def drawNumericXAxis(
       setup: ChartSetup,
-      style: LineChartStyleSpec,
+      style: LineChartStyle,
       result: mutable.ReusableBuilder[DrawOp, Vector[DrawOp]]
   ): Unit =
     val xAxisColour = style.xAxis.lineColour.getOrElse("black")
@@ -286,10 +289,10 @@ object LineChartInterpreter:
       val labelText = if step >= 1.0 then f"$value%.0f" else f"$value%.1f"
       drawLabel(labelText, x, y + 15, labelFont, xAxisColour, Alignment.Center, result)
 
-  private def drawYAxisElements[A](
-      spec: LineChartSpec[A],
+  private def drawYAxisElements(
+      chart: LineChart,
       setup: ChartSetup,
-      style: LineChartStyleSpec,
+      style: LineChartStyle,
       result: mutable.ReusableBuilder[DrawOp, Vector[DrawOp]]
   ): Unit =
     val yAxisColour = style.yAxis.lineColour.getOrElse("black")
@@ -424,13 +427,13 @@ object LineChartInterpreter:
     else if normalised < 7.5 then 5 * orderOfMagnitude // declutter ticks
     else 10 * orderOfMagnitude // declutter labels
 
-  private def drawSeries[A](
-      spec: LineChartSpec[A],
+  private def drawSeries(
+      chart: LineChart,
       setup: ChartSetup,
-      style: LineChartStyleSpec
+      style: LineChartStyle
   ): Vector[DrawOp] =
     val result = Vector.newBuilder[DrawOp]
-    spec.series.zipWithIndex.foreach { case (series, index) =>
+    chart.series.zipWithIndex.foreach { case (series, index) =>
       val seriesStyle = style.seriesStyles.getOrElse(index, style.defaultSeriesStyle)
       val colour = seriesStyle.colour.orElse(style.defaultSeriesStyle.colour).getOrElse("black")
       val lineWidth =
@@ -535,15 +538,15 @@ object LineChartInterpreter:
       case MarkerType.None =>
         Vector.empty
 
-  private def drawLegend[A](
-      spec: LineChartSpec[A],
+  private def drawLegend(
+      chart: LineChart,
       setup: ChartSetup,
-      style: LineChartStyleSpec
+      style: LineChartStyle
   ): Vector[DrawOp] =
     val result      = Vector.newBuilder[DrawOp]
     val legendStyle = style.legend
     if legendStyle.visible then
-      spec.series.zipWithIndex.foreach { case (series, index) =>
+      chart.series.zipWithIndex.foreach { case (series, index) =>
         val seriesStyle = style.seriesStyles.getOrElse(index, style.defaultSeriesStyle)
         val colour = seriesStyle.colour.orElse(style.defaultSeriesStyle.colour).getOrElse("black")
         val lineWidth = seriesStyle.lineWidth.getOrElse(2.0)
@@ -598,7 +601,7 @@ object LineChartInterpreter:
     result.result()
   end drawLegend
 
-  private def getSeriesPoints[A](series: LineSeries[A]): Vector[(Double, Double)] =
+  private def getSeriesPoints(series: LineSeries): Vector[(Double, Double)] =
     series.lineData match
       case LineData.Points(data) => data
       case LineData.FunctionPlot(f, start, end, sampleSize) =>
@@ -610,17 +613,16 @@ end LineChartInterpreter
 
 object LineChartInterpreterInstances:
 
-  given lineChartInterpreter[A]: Interpreter[LineChartSpec[A], Drawing] with
-    def interpret(spec: LineChartSpec[A]): Drawing =
-      LineChartInterpreter.interpretLineChart(spec)
+  given lineChartInterpreter: Interpreter[LineChart, Drawing] with
+    def interpret(chart: LineChart): Drawing =
+      LineChartInterpreter.interpretLineChart(chart)
 
-  given lineChartWithStyleInterpreter[A]
-      : Interpreter[(LineChartSpec[A], LineChartStyleSpec), Drawing] with
+  given lineChartWithStyleInterpreter: Interpreter[(LineChart, LineChartStyle), Drawing] with
 
-    def interpret(args: (LineChartSpec[A], LineChartStyleSpec)): Drawing =
-      val (spec, style) = args
-      LineChartInterpreter.interpretLineChart(spec, style)
+    def interpret(args: (LineChart, LineChartStyle)): Drawing =
+      val (chart, style) = args
+      LineChartInterpreter.interpretLineChart(chart, style)
 
-  given styledLineChartInterpreter[A]: Interpreter[StyledLineChart[A], Drawing] with
-    def interpret(styledChart: StyledLineChart[A]): Drawing =
-      LineChartInterpreter.interpretLineChart(styledChart.spec, styledChart.style)
+  given styledLineChartInterpreter: Interpreter[StyledLineChart, Drawing] with
+    def interpret(styledChart: StyledLineChart): Drawing =
+      LineChartInterpreter.interpretLineChart(styledChart.chart, styledChart.style)

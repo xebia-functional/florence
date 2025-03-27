@@ -1,14 +1,13 @@
 package florence.renderer.js
 
 import scala.scalajs.js
+import scala.scalajs.js.JSConverters.*
 
 import org.scalajs.dom
 import org.scalajs.dom.{CanvasRenderingContext2D, HTMLCanvasElement}
 
-import florence.core.model.shared.*
+import florence.core.model.shared.StyleTypes.*
 import florence.core.rendering.*
-
-import js.JSConverters.*
 
 /** Renderer for HTML5 Canvas
   *
@@ -143,14 +142,15 @@ object CanvasRenderer extends Renderer[CanvasRenderingContext2D]:
         ctx.setLineDash(dash.toJSArray)
       case None => ctx.setLineDash(js.Array[Double]())
 
+  given canvasRenderer: Renderer[CanvasRenderingContext2D] = CanvasRenderer
 end CanvasRenderer
 
-extension (canvas: HTMLCanvasElement)
-  def getContext2D(): CanvasRenderingContext2D =
-    canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
+object CanvasRendererExtensions:
 
-  def render(drawing: Drawing): Unit =
-    val ctx = getContext2D()
-    CanvasRenderer.render(drawing, ctx)
+  extension (canvas: HTMLCanvasElement)
+    def getContext2D(): CanvasRenderingContext2D =
+      canvas.getContext("2d").asInstanceOf[CanvasRenderingContext2D]
 
-given canvasRenderer: Renderer[CanvasRenderingContext2D] = CanvasRenderer
+    def render(drawing: Drawing): Unit =
+      val ctx = getContext2D()
+      CanvasRenderer.render(drawing, ctx)

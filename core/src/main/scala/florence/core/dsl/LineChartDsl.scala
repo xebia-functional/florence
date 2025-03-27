@@ -1,34 +1,41 @@
 package florence.core.dsl
 
 import florence.core.model.*
+import florence.core.model.ChartDef.LineChart
 
 object LineChartDsl:
 
-  def lineChart[A](title: String, series: LineSeries[A]*): LineChartSpec[A] =
-    LineChartSpec[A](
+  def lineChart(title: String, series: LineSeries*): LineChart =
+    LineChart(
       title = Some(title),
       series = series.toVector,
-      xAxis = AxisSpec.LinearScale(label = "x", min = None, max = None),
-      yAxis = AxisSpec.LinearScale(label = "y", min = None, max = None)
+      xAxis = AxisDef.LinearScale(label = "x", min = None, max = None),
+      yAxis = AxisDef.LinearScale(label = "y", min = None, max = None)
     )
 
-  extension [A](spec: LineChartSpec[A])
-    def withXAxis(axis: AxisSpec): LineChartSpec[A] =
-      spec.copy(xAxis = axis)
+  extension [A](chart: LineChart)
+    def withXAxis(axis: AxisDef): LineChart =
+      chart.copy(xAxis = axis)
 
-    def withYAxis(axis: AxisSpec): LineChartSpec[A] =
-      spec.copy(yAxis = axis)
+    def withYAxis(axis: AxisDef): LineChart =
+      chart.copy(yAxis = axis)
 
-    def withTitle(newTitle: String): LineChartSpec[A] =
-      spec.copy(title = Some(newTitle))
+    def withTitle(newTitle: String): LineChart =
+      chart.copy(title = Some(newTitle))
 
-    def addSeries(line: LineSeries[A]): LineChartSpec[A] =
-      spec.copy(series = spec.series :+ line)
+    def withNoTitle: LineChart =
+      chart.copy(title = None)
+
+    def withSeries(series: Vector[LineSeries]): LineChart =
+      chart.copy(series = series)
+
+    def addSeries(line: LineSeries): LineChart =
+      chart.copy(series = chart.series :+ line)
 
   def pointsSeries(
       label: String,
       points: (Double, Double)*
-  ): LineSeries[Nothing] =
+  ): LineSeries =
     LineSeries(
       label,
       LineData.Points(points.toVector)
@@ -40,7 +47,7 @@ object LineChartDsl:
       start: Double,
       end: Double,
       sampleSize: Int
-  ): LineSeries[Nothing] =
+  ): LineSeries =
     LineSeries(
       label,
       LineData.FunctionPlot(f, start, end, sampleSize)
@@ -51,9 +58,9 @@ object LineChartDsl:
       data: Vector[A],
       xFn: A => Double,
       yFn: A => Double
-  ): LineSeries[A] =
+  ): LineSeries =
     LineSeries(
       label,
-      LineData.GenericData(data, xFn, yFn)
+      LineData.GenericData[A](data, xFn, yFn)
     )
 end LineChartDsl

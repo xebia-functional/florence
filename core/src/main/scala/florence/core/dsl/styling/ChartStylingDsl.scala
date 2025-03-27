@@ -2,16 +2,12 @@ package florence.core.dsl.styling
 
 import florence.core.model.*
 import florence.core.model.styling.*
-
-final case class StyledChart[S <: ChartSpec, T <: ChartStyleSpec](
-    spec: S,
-    style: T
-)
-
-type StyledLineChart[A] = StyledChart[LineChartSpec[A], LineChartStyleSpec]
+import florence.core.model.styling.ChartStyleDef.LineChartStyle
 
 object ChartStylingDsl:
 
-  extension [A](spec: LineChartSpec[A])
-    def withStyling(style: LineChartStyleSpec): StyledLineChart[A] =
-      StyledChart(spec, style)
+  export LineChartStylingDsl.*
+
+  extension [C <: ChartDef, S <: ChartStyleDef](chart: C)
+    def withStyling(style: S): StyledChart[C, S] =
+      StyledChart(chart, style)
