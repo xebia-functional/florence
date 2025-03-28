@@ -9,6 +9,10 @@ val scala3Version = "3.6.4"
 
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
+addCommandAlias("ci-test", "scalafix --check; test")
+addCommandAlias("ci-docs", "update")
+addCommandAlias("ci-publish", "update")
+
 lazy val commonSettings = Seq(
   organization := "com.xebia",
   scalaVersion := scala3Version
