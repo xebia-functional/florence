@@ -11,7 +11,10 @@ ThisBuild / version      := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "com.xebia"
 ThisBuild / scalaVersion := scala3Version
 
-addCommandAlias("ci-test", "scalafmtCheckAll; scalafmtSbtCheck; scalafix --check; docs/mdoc; ++test")
+addCommandAlias(
+  "ci-test",
+  "scalafmtCheckAll; scalafmtSbtCheck; scalafix --check; docs/mdoc; ++test"
+)
 addCommandAlias("ci-docs", "github; documentation/mdoc; headerCreateAll")
 addCommandAlias("ci-publish", "github; ci-release")
 
