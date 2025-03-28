@@ -52,6 +52,7 @@ lazy val sandboxJS = (project in file("sandbox/js"))
   .dependsOn(rendererJS)
   .settings(
     name                            := "florence-sandbox-js",
+    publish / skip                  := true,
     scalaJSUseMainModuleInitializer := true,
     scalaJSMainModuleInitializer := Some(
       org.scalajs.linker.interface.ModuleInitializer
@@ -63,7 +64,8 @@ lazy val sandboxJS = (project in file("sandbox/js"))
 lazy val sandboxJVM = (project in file("sandbox/jvm"))
   .dependsOn(rendererJVM)
   .settings(
-    name := "florence-sandbox-jvm"
+    name           := "florence-sandbox-jvm",
+    publish / skip := true
   )
 
 lazy val documentation = project
