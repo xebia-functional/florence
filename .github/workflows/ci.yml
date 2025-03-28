@@ -1,0 +1,89 @@
+# Don't edit this file!
+# It is automatically updated after every release of https://github.com/47degrees/.github
+# If you want to suggest a change, please open a PR or issue in that repository
+
+name: Formatters & Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  USE_RUBY: ${{ vars.USE_RUBY || 'false' }}
+  USE_YQ: ${{ vars.USE_YQ || 'false' }}
+  USE_CACHE: ${{ vars.USE_CACHE || 'false' }}
+  CACHE_FOLDER: ${{ vars.CACHE_FOLDER || '.cache' }}
+
+jobs:
+  test:
+    if: ${{!contains(github.event.head_commit.message, 'skip ci') && !github.event.pull_request.draft}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project (pull-request)
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v2.3.2
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+      - name: Checkout project (main)
+        if: github.event_name == 'push'
+        uses: actions/checkout@v2
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@v11
+        with:
+          java-version: adopt@1.11
+      - name: Setup Ruby
+        if: ${{ env.USE_RUBY == 'true' }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+      - name: Setup yq
+        if: ${{ env.USE_YQ == 'true' }}
+        run: sudo snap install yq
+      - name: Run pre-conditions
+        run: test -f .github/actions.yml && eval "$(yq e '.pre.ci // "true"' .github/actions.yml)" || true
+      - name: Run scalafmt on Scala Steward PRs
+        if: github.event.pull_request.user.login == '47erbot' && contains(github.event.pull_request.body, 'Scala Steward')
+        run: sbt "scalafixEnable; fix" || sbt "scalafmtAll; scalafmtSbt" || true
+      - name: Push changes
+        uses: stefanzweifel/git-auto-commit-action@v4.5.1
+        with:
+          commit_message: Run formatter/linter
+      - name: Restore cache
+        id: ci-cache-restore
+        if: ${{ env.USE_CACHE == 'true' }}
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            ${{ env.CACHE_FOLDER }}
+          key: ci-cache-key
+      - name: Run checks
+        run: sbt ci-test
+        env:
+          GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+      - name: Save cache
+        id: ci-cache-save
+        if: ${{ env.USE_CACHE == 'true' }}
+        uses: actions/cache/save@v3
+        with:
+          path: |
+            ${{ env.CACHE_FOLDER }}
+          key: ${{ steps.ci-cache-restore.outputs.cache-primary-key }}
+      - name: Run post-conditions
+        run: test -f .github/actions.yml && eval "$(yq e '.post.ci // "true"' .github/actions.yml)" || true
+      - name: Automerge Scala Steward PRs
+        if: success() && github.event_name == 'pull_request' && contains(github.event.pull_request.body, 'Scala Steward')
+        uses: ridedott/merge-me-action@v1.1.36
+        with:
+          GITHUB_LOGIN: 47erbot
+          GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
