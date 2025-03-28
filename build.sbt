@@ -7,7 +7,6 @@ import sbtprojectmatrix.ProjectMatrixPlugin.autoImport._
 
 val scala3Version = "3.6.4"
 
-ThisBuild / version      := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "com.xebia"
 ThisBuild / scalaVersion := scala3Version
 
