@@ -7,8 +7,9 @@ import sbtprojectmatrix.ProjectMatrixPlugin.autoImport._
 
 val scala3Version = "3.6.4"
 
-ThisBuild / organization := "com.xebia"
-ThisBuild / scalaVersion := scala3Version
+ThisBuild / organization  := "com.xebia"
+ThisBuild / scalaVersion  := scala3Version
+ThisBuild / versionScheme := Some("early-semver")
 
 addCommandAlias(
   "ci-test",
@@ -16,6 +17,13 @@ addCommandAlias(
 )
 addCommandAlias("ci-docs", "github; documentation/mdoc; headerCreateAll")
 addCommandAlias("ci-publish", "github; ci-release")
+
+lazy val noPublishSettings = Seq(
+  publish         := {},
+  publishLocal    := {},
+  publishArtifact := false,
+  publish / skip  := true
+)
 
 lazy val core = (projectMatrix in file("core"))
   .settings(
@@ -50,9 +58,9 @@ lazy val rendererJVM = (project in file("renderer/jvm"))
 lazy val sandboxJS = (project in file("sandbox/js"))
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(rendererJS)
+  .settings(noPublishSettings)
   .settings(
     name                            := "florence-sandbox-js",
-    publish / skip                  := true,
     scalaJSUseMainModuleInitializer := true,
     scalaJSMainModuleInitializer := Some(
       org.scalajs.linker.interface.ModuleInitializer
@@ -63,20 +71,20 @@ lazy val sandboxJS = (project in file("sandbox/js"))
 
 lazy val sandboxJVM = (project in file("sandbox/jvm"))
   .dependsOn(rendererJVM)
+  .settings(noPublishSettings)
   .settings(
-    name           := "florence-sandbox-jvm",
-    publish / skip := true
+    name := "florence-sandbox-jvm"
   )
 
 lazy val documentation = project
   .enablePlugins(MdocPlugin)
+  .settings(noPublishSettings)
   .settings(mdocOut := file("."))
-  .settings(publish / skip := true)
   .settings(scalaVersion := scala3Version)
 
 lazy val root = (project in file("."))
   .aggregate(coreJVM, coreJS, rendererJS, rendererJVM, sandboxJS, sandboxJVM)
+  .settings(noPublishSettings)
   .settings(
-    name           := "florence",
-    publish / skip := true
+    name := "florence"
   )
