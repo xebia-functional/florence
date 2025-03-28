@@ -13,7 +13,7 @@ ThisBuild / scalaVersion := scala3Version
 
 addCommandAlias(
   "ci-test",
-  "scalafmtCheckAll; scalafmtSbtCheck; scalafix --check; docs/mdoc; ++test"
+  "scalafmtCheckAll; scalafmtSbtCheck; scalafix --check; ++test"
 )
 addCommandAlias("ci-docs", "github; documentation/mdoc; headerCreateAll")
 addCommandAlias("ci-publish", "github; ci-release")
