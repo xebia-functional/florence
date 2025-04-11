@@ -123,12 +123,12 @@ object Example:
         pointsSeries("TMin 2025", tmin2025*)
       )
         .withXAxis(
-          AxisDef.CategoryScale(
+          Axis.CategoryScale(
             "Month",
             categories = Some(Vector("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"))
           )
         )
-        .withYAxis(AxisDef.LinearScale("Temperature (°C)", None, None))
+        .withYAxis(Axis.LinearScale("Temperature (°C)", None, None))
     val style = lineChartStyle()
       .withDefaultSeriesStyle(
         LineSeriesStyle(

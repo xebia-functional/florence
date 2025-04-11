@@ -20,10 +20,10 @@ import scala.collection.mutable
 
 import florence.core.dsl.styling.LineChartStylingDsl.*
 import florence.core.model.*
-import florence.core.model.ChartDef.LineChart
+import florence.core.model.Chart.LineChart
 import florence.core.model.shared.StyleTypes.*
 import florence.core.model.styling.*
-import florence.core.model.styling.ChartStyleDef.LineChartStyle
+import florence.core.model.styling.ChartStyle.LineChartStyle
 import florence.core.model.styling.WithCommonProps.*
 import florence.core.model.styling.WithCommonProps.given
 
@@ -74,12 +74,12 @@ object LineChartInterpreter:
     val (yMin, yMax)                             = computeAxisRange(chart.yAxis, dataYMin, dataYMax)
     ChartSetup(width, height, margins, xMin, xMax, yMin, yMax, plotWidth, plotHeight)
 
-  private def computeAxisRange(axis: AxisDef, dataMin: Double, dataMax: Double): (Double, Double) =
+  private def computeAxisRange(axis: Axis, dataMin: Double, dataMax: Double): (Double, Double) =
     axis match
-      case AxisDef.LinearScale(_, min, max) =>
+      case Axis.LinearScale(_, min, max) =>
         // Use provided min/max or fallback to data ranges
         (min.getOrElse(dataMin), max.getOrElse(dataMax))
-      case AxisDef.CategoryScale(_, categories) =>
+      case Axis.CategoryScale(_, categories) =>
         // Axis padding: extra 5% on both sides of the axis
         val categoryCount = categories.map(_.size).getOrElse(0)
         val padding       = Math.max(0.5, categoryCount * 0.05)
@@ -172,12 +172,12 @@ object LineChartInterpreter:
     val yLabelFont = style.yAxis.labelFont.getOrElse(FontSpec("sans-serif", 12.0, "normal"))
 
     val xAxisLabel = chart.xAxis match
-      case AxisDef.LinearScale(label, _, _) => label
-      case AxisDef.CategoryScale(label, _)  => label
+      case Axis.LinearScale(label, _, _) => label
+      case Axis.CategoryScale(label, _)  => label
 
     val yAxisLabel = chart.yAxis match
-      case AxisDef.LinearScale(label, _, _) => label
-      case AxisDef.CategoryScale(label, _)  => label
+      case Axis.LinearScale(label, _, _) => label
+      case Axis.CategoryScale(label, _)  => label
 
     result += TextOp(
       xAxisLabel,
@@ -231,11 +231,11 @@ object LineChartInterpreter:
       result: mutable.ReusableBuilder[DrawOp, Vector[DrawOp]]
   ): Unit =
     chart.xAxis match
-      case AxisDef.CategoryScale(_, Some(categories)) =>
+      case Axis.CategoryScale(_, Some(categories)) =>
         drawCategoricalXAxis(categories, setup, style, result)
-      case AxisDef.CategoryScale(_, None) =>
+      case Axis.CategoryScale(_, None) =>
         drawAutoCategoricalXAxis(setup, style, result)
-      case AxisDef.LinearScale(_, _, _) =>
+      case Axis.LinearScale(_, _, _) =>
         drawNumericXAxis(setup, style, result)
   end drawXAxisElements
 

@@ -16,9 +16,9 @@
 
 package florence.core.dsl.styling
 
-import florence.core.model.ChartDef.LineChart
+import florence.core.model.Chart.LineChart
 import florence.core.model.styling.*
-import florence.core.model.styling.ChartStyleDef.LineChartStyle
+import florence.core.model.styling.ChartStyle.LineChartStyle
 
 object LineChartStylingDsl:
 

@@ -16,12 +16,12 @@
 
 package florence.core.dsl.styling
 
-import florence.core.model.ChartDef
-import florence.core.model.ChartDef.LineChart
-import florence.core.model.styling.ChartStyleDef
-import florence.core.model.styling.ChartStyleDef.LineChartStyle
+import florence.core.model.Chart
+import florence.core.model.Chart.LineChart
+import florence.core.model.styling.ChartStyle
+import florence.core.model.styling.ChartStyle.LineChartStyle
 
-final case class StyledChart[C <: ChartDef, S <: ChartStyleDef](
+final case class StyledChart[C <: Chart, S <: ChartStyle](
     chart: C,
     style: S
 )
