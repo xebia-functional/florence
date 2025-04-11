@@ -82,8 +82,8 @@ styledChart.renderTo(canvas.getContext2D())
 
 ```scala
 val chart = lineChart("My Chart")
-  .withXAxis(AxisDef.CategoryScale("Month", categories = Some(Vector("Jan", "Feb", "Mar", "Apr"))))
-  .withYAxis(AxisDef.LinearScale("Value", Some(0.0), Some(100.0)))
+  .withXAxis(Axis.CategoryScale("Month", categories = Some(Vector("Jan", "Feb", "Mar", "Apr"))))
+  .withYAxis(Axis.LinearScale("Value", Some(0.0), Some(100.0)))
 ```
 
 ### Multiple Series
@@ -115,23 +115,23 @@ val salesData = Vector(
 val chart = lineChart(
   "Sales Performance",
   genericSeries[SalesData](
-    "Revenue", 
-    salesData, 
+    "Revenue",
+    salesData,
     // Extract x-value (convert month to numeric position)
     data => salesData.indexOf(data).toDouble + 1,
     // Extract y-value (revenue)
     data => data.revenue
   ),
   genericSeries[SalesData](
-    "Expenses", 
-    salesData, 
-    data => salesData.indexOf(data).toDouble + 1, 
+    "Expenses",
+    salesData,
+    data => salesData.indexOf(data).toDouble + 1,
     data => data.expenses
   ),
   genericSeries[SalesData](
-    "Profit", 
-    salesData, 
-    data => salesData.indexOf(data).toDouble + 1, 
+    "Profit",
+    salesData,
+    data => salesData.indexOf(data).toDouble + 1,
     data => data.profit
   )
 )

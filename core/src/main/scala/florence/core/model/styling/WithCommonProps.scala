@@ -17,7 +17,7 @@
 package florence.core.model.styling
 
 import florence.core.model.shared.StyleTypes.*
-import florence.core.model.styling.ChartStyleDef.LineChartStyle
+import florence.core.model.styling.ChartStyle.LineChartStyle
 
 trait WithCommonProps[T]:
   def getCommonProps(t: T): CommonStyleProps
@@ -95,13 +95,13 @@ object WithCommonProps:
     ): LineChartStyle =
       style.copy(commonProps = props)
 
-  given WithCommonProps[ChartStyleDef] with
+  given WithCommonProps[ChartStyle] with
 
-    def getCommonProps(style: ChartStyleDef): CommonStyleProps = style match
+    def getCommonProps(style: ChartStyle): CommonStyleProps = style match
       case s: LineChartStyle =>
         summon[WithCommonProps[LineChartStyle]].getCommonProps(s)
 
-    def withCommonProps(style: ChartStyleDef, props: CommonStyleProps): ChartStyleDef =
+    def withCommonProps(style: ChartStyle, props: CommonStyleProps): ChartStyle =
       style match
         case s: LineChartStyle =>
           summon[WithCommonProps[LineChartStyle]].withCommonProps(s, props)

@@ -16,13 +16,13 @@
 
 package florence.core.model
 
-enum ChartDef:
+enum Chart:
 
   case LineChart(
       title: Option[String],
       series: Vector[LineSeries],
-      xAxis: AxisDef,
-      yAxis: AxisDef
+      xAxis: Axis,
+      yAxis: Axis
   )
 
 final case class LineSeries(
@@ -35,6 +35,6 @@ enum LineData:
   case FunctionPlot(f: Double => Double, start: Double, end: Double, sampleSize: Int)
   case GenericData[A](data: Vector[A], x: A => Double, y: A => Double)
 
-enum AxisDef:
+enum Axis:
   case LinearScale(label: String, min: Option[Double], max: Option[Double])
   case CategoryScale(label: String, categories: Option[Vector[String]] = None)

@@ -17,8 +17,8 @@
 package florence.core.rendering
 
 import florence.core.dsl.styling.StyledChart
-import florence.core.model.ChartDef
-import florence.core.model.styling.ChartStyleDef
+import florence.core.model.Chart
+import florence.core.model.styling.ChartStyle
 
 /** Typeclass for rendering a Drawing to a specific context/platform
   *
@@ -35,7 +35,7 @@ object Renderer:
 
 object RendererExtensions:
 
-  extension [C <: ChartDef, S <: ChartStyleDef, Ctx](chart: C)
+  extension [C <: Chart, S <: ChartStyle, Ctx](chart: C)
 
     def renderWith(style: S, context: Ctx)(using
         interpreter: Interpreter[(C, S), Drawing],
@@ -44,7 +44,7 @@ object RendererExtensions:
       val drawing = interpreter.interpret((chart, style))
       renderer.render(drawing, context)
 
-  extension [C <: ChartDef, Ctx](chart: C)
+  extension [C <: Chart, Ctx](chart: C)
 
     def renderTo(
         context: Ctx
@@ -56,7 +56,7 @@ object RendererExtensions:
     def renderTo[Ctx](context: Ctx)(using renderer: Renderer[Ctx]): Unit =
       Renderer.render(drawing, context)
 
-  extension [C <: ChartDef, S <: ChartStyleDef, Ctx](styledChart: StyledChart[C, S])
+  extension [C <: Chart, S <: ChartStyle, Ctx](styledChart: StyledChart[C, S])
 
     def renderTo(
         context: Ctx

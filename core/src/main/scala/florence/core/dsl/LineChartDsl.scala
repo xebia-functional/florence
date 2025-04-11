@@ -17,7 +17,7 @@
 package florence.core.dsl
 
 import florence.core.model.*
-import florence.core.model.ChartDef.LineChart
+import florence.core.model.Chart.LineChart
 
 object LineChartDsl:
 
@@ -25,15 +25,15 @@ object LineChartDsl:
     LineChart(
       title = Some(title),
       series = series.toVector,
-      xAxis = AxisDef.LinearScale(label = "x", min = None, max = None),
-      yAxis = AxisDef.LinearScale(label = "y", min = None, max = None)
+      xAxis = Axis.LinearScale(label = "x", min = None, max = None),
+      yAxis = Axis.LinearScale(label = "y", min = None, max = None)
     )
 
   extension [A](chart: LineChart)
-    def withXAxis(axis: AxisDef): LineChart =
+    def withXAxis(axis: Axis): LineChart =
       chart.copy(xAxis = axis)
 
-    def withYAxis(axis: AxisDef): LineChart =
+    def withYAxis(axis: Axis): LineChart =
       chart.copy(yAxis = axis)
 
     def withTitle(newTitle: String): LineChart =

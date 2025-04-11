@@ -18,7 +18,7 @@ package florence.core.model.styling
 
 import florence.core.model.shared.StyleTypes.*
 
-enum ChartStyleDef:
+enum ChartStyle:
 
   case LineChartStyle(
       commonProps: CommonStyleProps = CommonStyleProps(),
