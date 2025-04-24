@@ -74,6 +74,20 @@ lazy val sandboxJVM = (project in file("sandbox/jvm"))
     name := "florence-sandbox-jvm"
   )
 
+lazy val tyriansandbox =
+  (project in file("sandbox-tyrian"))
+    .enablePlugins(ScalaJSPlugin)
+    .dependsOn(rendererJS)
+    .settings(noPublishSettings)
+    .settings(
+      name := "tyrian-sandbox",
+      libraryDependencies ++= Seq(
+        "io.indigoengine" %%% "tyrian-io" % "0.13.0",
+        "org.scalameta"   %%% "munit"     % "1.1.0" % Test
+      ),
+      scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) }
+    )
+
 lazy val documentation = project
   .enablePlugins(MdocPlugin)
   .settings(noPublishSettings)
@@ -81,7 +95,7 @@ lazy val documentation = project
   .settings(scalaVersion := scala3Version)
 
 lazy val root = (project in file("."))
-  .aggregate(coreJVM, coreJS, rendererJS, rendererJVM, sandboxJS, sandboxJVM)
+  .aggregate(coreJVM, coreJS, rendererJS, rendererJVM, sandboxJS, sandboxJVM, tyriansandbox)
   .settings(noPublishSettings)
   .settings(
     name := "florence"
