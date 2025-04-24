@@ -5,6 +5,8 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import org.scalajs.linker.interface.ModuleKind
 import sbtprojectmatrix.ProjectMatrixPlugin.autoImport._
 
+Global / onChangedBuildSource := ReloadOnSourceChanges
+
 val scala3Version = "3.6.4"
 
 ThisBuild / organization  := "com.xebia"
