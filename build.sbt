@@ -33,10 +33,6 @@ lazy val core = (projectMatrix in file("core"))
   )
   .jvmPlatform(Seq(scala3Version))
   .jsPlatform(Seq(scala3Version))
-  .settings(
-    scalaJSUseMainModuleInitializer := false,
-    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }
-  )
 
 lazy val coreJVM = core.jvm(scala3Version)
 lazy val coreJS  = core.js(scala3Version)
