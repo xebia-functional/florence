@@ -74,7 +74,7 @@ lazy val sandboxJVM = (project in file("sandbox/jvm"))
     name := "florence-sandbox-jvm"
   )
 
-lazy val tyriansandbox =
+lazy val sandboxTyrian =
   (project in file("sandbox-tyrian"))
     .enablePlugins(ScalaJSPlugin)
     .dependsOn(rendererJS)
@@ -95,7 +95,7 @@ lazy val documentation = project
   .settings(scalaVersion := scala3Version)
 
 lazy val root = (project in file("."))
-  .aggregate(coreJVM, coreJS, rendererJS, rendererJVM, sandboxJS, sandboxJVM, tyriansandbox)
+  .aggregate(coreJVM, coreJS, rendererJS, rendererJVM, sandboxJS, sandboxJVM, sandboxTyrian)
   .settings(noPublishSettings)
   .settings(
     name := "florence"
