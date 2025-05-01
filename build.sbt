@@ -5,6 +5,8 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import org.scalajs.linker.interface.ModuleKind
 import sbtprojectmatrix.ProjectMatrixPlugin.autoImport._
 
+Global / onChangedBuildSource := ReloadOnSourceChanges
+
 val scala3Version = "3.6.4"
 
 ThisBuild / organization  := "com.xebia"
@@ -31,10 +33,6 @@ lazy val core = (projectMatrix in file("core"))
   )
   .jvmPlatform(Seq(scala3Version))
   .jsPlatform(Seq(scala3Version))
-  .settings(
-    scalaJSUseMainModuleInitializer := false,
-    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }
-  )
 
 lazy val coreJVM = core.jvm(scala3Version)
 lazy val coreJS  = core.js(scala3Version)
@@ -76,6 +74,20 @@ lazy val sandboxJVM = (project in file("sandbox/jvm"))
     name := "florence-sandbox-jvm"
   )
 
+lazy val sandboxTyrian =
+  (project in file("sandbox-tyrian"))
+    .enablePlugins(ScalaJSPlugin)
+    .dependsOn(rendererJS)
+    .settings(noPublishSettings)
+    .settings(
+      name := "tyrian-sandbox",
+      libraryDependencies ++= Seq(
+        "io.indigoengine" %%% "tyrian-io" % "0.13.0",
+        "org.scalameta"   %%% "munit"     % "1.1.0" % Test
+      ),
+      scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) }
+    )
+
 lazy val documentation = project
   .enablePlugins(MdocPlugin)
   .settings(noPublishSettings)
@@ -83,7 +95,7 @@ lazy val documentation = project
   .settings(scalaVersion := scala3Version)
 
 lazy val root = (project in file("."))
-  .aggregate(coreJVM, coreJS, rendererJS, rendererJVM, sandboxJS, sandboxJVM)
+  .aggregate(coreJVM, coreJS, rendererJS, rendererJVM, sandboxJS, sandboxJVM, sandboxTyrian)
   .settings(noPublishSettings)
   .settings(
     name := "florence"
