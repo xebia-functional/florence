@@ -83,7 +83,7 @@ lazy val sandboxTyrian =
       name := "tyrian-sandbox",
       libraryDependencies ++= Seq(
         "io.indigoengine" %%% "tyrian-io" % "0.13.0",
-        "org.scalameta"   %%% "munit"     % "1.1.0" % Test
+        "org.scalameta"   %%% "munit"     % "1.1.1" % Test
       ),
       scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) }
     )
