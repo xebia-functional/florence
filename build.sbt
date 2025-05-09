@@ -7,7 +7,7 @@ import sbtprojectmatrix.ProjectMatrixPlugin.autoImport._
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-val scala3Version = "3.6.4"
+val scala3Version = "3.7.0"
 
 ThisBuild / organization  := "com.xebia"
 ThisBuild / scalaVersion  := scala3Version
