@@ -1,6 +1,6 @@
 addSbtPlugin("org.scala-js"        % "sbt-scalajs"            % "1.19.0")
 addSbtPlugin("com.eed3si9n"        % "sbt-projectmatrix"      % "0.11.0")
-addSbtPlugin("org.scalameta"       % "sbt-scalafmt"           % "2.5.4")
+addSbtPlugin("org.scalameta"       % "sbt-scalafmt"           % "2.5.5")
 addSbtPlugin("org.typelevel"       % "sbt-typelevel-scalafix" % "0.8.0")
 addSbtPlugin("com.github.sbt"      % "sbt-ci-release"         % "1.11.1")
 addSbtPlugin("com.alejandrohdezma" % "sbt-github"             % "0.12.0")
