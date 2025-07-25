@@ -44,7 +44,7 @@ lazy val rendererJS = (project in file("renderer/js"))
     name                            := "florence-renderer-js",
     scalaJSUseMainModuleInitializer := false,
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) },
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.8.0"
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.8.1"
   )
 
 lazy val rendererJVM = (project in file("renderer/jvm"))
