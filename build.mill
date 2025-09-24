@@ -1,0 +1,87 @@
+//| mill-version: 1.0.5
+//| mvnDeps:
+//| - com.goyeau::mill-scalafix::0.6.0
+//| - org.typelevel::scalac-options:0.1.8
+
+import mill.*
+import mill.scalalib.*
+import mill.scalajslib.*
+import mill.scalalib.publish.*
+import mill.scalalib.scalafmt.*
+import mill.api.BuildCtx
+import com.goyeau.mill.scalafix.ScalafixModule
+import org.typelevel.scalacoptions.*
+
+object `florence-core` extends Module:
+  object jvm extends CommonJVM, PlatformScalaModule, CommonPublish
+  object js extends CommonJS, PlatformScalaModule, CommonPublish
+
+object `florence-renderer` extends Module:
+
+  object jvm extends CommonJVM, PlatformScalaModule, CommonPublish:
+    def moduleDeps = Seq(`florence-core`.jvm)
+    
+  object js extends CommonJS, PlatformScalaModule, CommonPublish:
+    def moduleDeps = Seq(`florence-core`.js)
+    def mvnDeps = Seq(
+      mvn"org.scala-js::scalajs-dom::2.8.1"
+    )
+
+object `sandbox-tyrian` extends CommonJS:
+  def mvnDeps = Seq(
+    mvn"io.indigoengine::tyrian-io::0.14.0"
+  )
+
+  def moduleDeps = Seq(`florence-renderer`.js)
+  
+  override def moduleKind = Task(mill.scalajslib.api.ModuleKind.CommonJSModule)
+
+object sandbox extends CommonJS:
+  def moduleDeps = Seq(`florence-renderer`.js)
+  
+  override def moduleKind = Task(mill.scalajslib.api.ModuleKind.CommonJSModule)
+
+// --- traits to apply common settings to modules ---
+
+trait Common extends ScalaModule, ScalafmtModule, ScalafixModule:
+  def scalaVersion = "3.7.3"
+  
+  override def scalacOptions = Task {
+    super.scalacOptions() ++
+      ScalacOptions.tokensForVersion(
+        ScalaVersion.unsafeFromString(scalaVersion()),
+        ScalacOptions.default ++ ScalacOptions.fatalWarningOptions
+      )
+  }
+
+trait CommonJVM extends Common:
+  object test extends ScalaTests:
+    def mvnDeps = Seq(
+      mvn"org.scalameta::munit::1.2.0"
+    )
+
+    def testFramework = Task("munit.Framework")
+
+trait CommonJS extends Common, ScalaJSModule:
+  def scalaJSVersion = Task("1.20.1")
+
+  object test extends ScalaJSTests:
+    def mvnDeps = Seq(
+      mvn"org.scalameta::munit::1.2.0"
+    )
+
+    override def moduleKind = Task(mill.scalajslib.api.ModuleKind.CommonJSModule)
+
+    def testFramework = Task("munit.Framework")
+
+trait CommonPublish extends PublishModule:
+  def publishVersion = "0.0.1-SNAPSHOT"
+
+  def pomSettings = PomSettings(
+    description = "Florence is a charting library for Scala.",
+    organization = "com.xebia",
+    url = "https://github.com/xebia-functional/florence",
+    licenses = Seq(License.`Apache-2.0`),
+    versionControl = VersionControl.github("xebia-functional", "florence"),
+    developers = Seq() // Seq(Developer("<gh-handle>", "full name", "https://github.com/<gh-handle>/"))
+  )

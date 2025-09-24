@@ -52,9 +52,6 @@ jobs:
         run: sudo snap install yq
       - name: Run pre-conditions
         run: test -f .github/actions.yml && eval "$(yq e '.pre.ci // "true"' .github/actions.yml)" || true
-      - name: Run scalafmt on Scala Steward PRs
-        if: github.event.pull_request.user.login == '47erbot' && contains(github.event.pull_request.body, 'Scala Steward')
-        run: sbt "scalafixEnable; fix" || sbt "scalafmtAll; scalafmtSbt" || true
       - name: Push changes
         uses: stefanzweifel/git-auto-commit-action@v4.5.1
         with:
@@ -68,7 +65,7 @@ jobs:
             ${{ env.CACHE_FOLDER }}
           key: ci-cache-key
       - name: Run checks
-        run: sbt ci-test
+        run: bash ci.sh
         env:
           GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
       - name: Save cache
