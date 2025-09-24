@@ -52,10 +52,6 @@ jobs:
         run: sudo snap install yq
       - name: Run pre-conditions
         run: test -f .github/actions.yml && eval "$(yq e '.pre.ci // "true"' .github/actions.yml)" || true
-      - name: Push changes
-        uses: stefanzweifel/git-auto-commit-action@v4.5.1
-        with:
-          commit_message: Run formatter/linter
       - name: Restore cache
         id: ci-cache-restore
         if: ${{ env.USE_CACHE == 'true' }}
