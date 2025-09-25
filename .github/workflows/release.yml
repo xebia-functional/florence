@@ -36,7 +36,7 @@ jobs:
       - name: Run pre-conditions
         run: test -f .github/actions.yml && eval "$(yq e '.pre.release // "true"' .github/actions.yml)" || true
       - name: Release new version
-        run: sbt ci-publish
+        run: bash ci.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}

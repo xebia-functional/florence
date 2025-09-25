@@ -17,10 +17,21 @@ Florence is a charting library for Scala.
 Add Florence to your project (in your `build.sbt`):
 
 ```scala
-libraryDependencies += "com.xebia" %%% "florence-core" % "0.1.0-SNAPSHOT"
+// sbt
+libraryDependencies += "com.xebia" %%% "florence-core" % "x.y.z"
+// Mill
+def mvnDeps = Seq(mvn"com.xebia::florence-core::x.y.z")
+// Scala-CLI
+//> using dep com.xebia::florence-core::x.y.z
 
 // For JavaScript canvas rendering
-libraryDependencies += "com.xebia" %%% "florence-renderer-js" % "0.1.0-SNAPSHOT"
+
+// sbt
+libraryDependencies += "com.xebia" %%% "florence-renderer-js" % "x.y.z"
+// Mill
+def mvnDeps = Seq(mvn"com.xebia::florence-renderer-js::x.y.z")
+// Scala-CLI
+//> using dep com.xebia::florence-renderer-js::x.y.z
 ```
 
 ### Creating a Simple Chart
