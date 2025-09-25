@@ -37,7 +37,7 @@ export florence.core.model.styling.WithCommonProps.*
 export florence.core.dsl.ChartDsl.*
 export florence.core.dsl.styling.ChartStylingDsl.*
 
-//rendering exports
+// rendering exports
 export florence.core.rendering.Interpreter
 export florence.core.rendering.Interpreters
 export florence.core.rendering.LineChartInterpreter
@@ -45,6 +45,11 @@ export florence.core.rendering.LineChartInterpreterInstances.*
 export florence.core.rendering.Renderer
 export florence.core.rendering.RendererExtensions.*
 
+// renderer exports
+export florence.renderer.CanvasRenderer
+export florence.renderer.CanvasRendererExtensions.*
+
 object instances:
   export florence.core.rendering.LineChartInterpreterInstances.given
   export florence.core.model.styling.WithCommonProps.given
+  export florence.renderer.CanvasRenderer.given

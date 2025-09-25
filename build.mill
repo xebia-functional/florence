@@ -16,7 +16,7 @@ object `florence-core` extends Module:
   object jvm extends CommonJVM, PlatformScalaModule, CommonPublish
   object js extends CommonJS, PlatformScalaModule, CommonPublish
 
-object `florence-renderer` extends Module:
+object florence extends Module:
 
   object jvm extends CommonJVM, PlatformScalaModule, CommonPublish:
     def moduleDeps = Seq(`florence-core`.jvm)
@@ -32,12 +32,12 @@ object `sandbox-tyrian` extends CommonJS:
     mvn"io.indigoengine::tyrian-io::0.14.0"
   )
 
-  def moduleDeps = Seq(`florence-renderer`.js)
+  def moduleDeps = Seq(florence.js)
   
   override def moduleKind = Task(mill.scalajslib.api.ModuleKind.CommonJSModule)
 
 object sandbox extends CommonJS:
-  def moduleDeps = Seq(`florence-renderer`.js)
+  def moduleDeps = Seq(florence.js)
   
   override def moduleKind = Task(mill.scalajslib.api.ModuleKind.CommonJSModule)
 

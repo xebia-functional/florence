@@ -4,8 +4,6 @@ import org.scalajs.dom.HTMLCanvasElement
 
 import florence.*
 import florence.instances.given
-import florence.renderer.*
-import florence.renderer.instances.given
 
 object CustomChart:
 
