@@ -44,6 +44,7 @@ metals.sbt
 
 # Techinically a duplicate of the IDEA section.
 out/
+mill.*
 
 ### Vim ###
 
