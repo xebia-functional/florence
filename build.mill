@@ -13,21 +13,21 @@ import com.goyeau.mill.scalafix.ScalafixModule
 import org.typelevel.scalacoptions.*
 
 object `florence-core` extends Module:
-  object jvm extends CommonJVM, PlatformScalaModule, CommonPublish
-  object js extends CommonJS, PlatformScalaModule, CommonPublish
+  object jvm extends SharedJVM, PlatformScalaModule, SharedPublish
+  object js extends SharedJS, PlatformScalaModule, SharedPublish
 
 object florence extends Module:
 
-  object jvm extends CommonJVM, PlatformScalaModule, CommonPublish:
+  object jvm extends SharedJVM, PlatformScalaModule, SharedPublish:
     def moduleDeps = Seq(`florence-core`.jvm)
     
-  object js extends CommonJS, PlatformScalaModule, CommonPublish:
+  object js extends SharedJS, PlatformScalaModule, SharedPublish:
     def moduleDeps = Seq(`florence-core`.js)
     def mvnDeps = Seq(
       mvn"org.scala-js::scalajs-dom::2.8.1"
     )
 
-object `sandbox-tyrian` extends CommonJS:
+object `sandbox-tyrian` extends SharedJS:
   def mvnDeps = Seq(
     mvn"io.indigoengine::tyrian-io::0.14.0"
   )
@@ -36,14 +36,14 @@ object `sandbox-tyrian` extends CommonJS:
   
   override def moduleKind = Task(mill.scalajslib.api.ModuleKind.CommonJSModule)
 
-object sandbox extends CommonJS:
+object sandbox extends SharedJS:
   def moduleDeps = Seq(florence.js)
   
   override def moduleKind = Task(mill.scalajslib.api.ModuleKind.CommonJSModule)
 
 // --- traits to apply common settings to modules ---
 
-trait Common extends ScalaModule, ScalafmtModule, ScalafixModule:
+trait Shared extends ScalaModule, ScalafmtModule, ScalafixModule:
   def scalaVersion = "3.7.3"
   
   override def scalacOptions = Task {
@@ -54,7 +54,7 @@ trait Common extends ScalaModule, ScalafmtModule, ScalafixModule:
       )
   }
 
-trait CommonJVM extends Common:
+trait SharedJVM extends Shared:
   object test extends ScalaTests:
     def mvnDeps = Seq(
       mvn"org.scalameta::munit::1.2.0"
@@ -62,7 +62,7 @@ trait CommonJVM extends Common:
 
     def testFramework = Task("munit.Framework")
 
-trait CommonJS extends Common, ScalaJSModule:
+trait SharedJS extends Shared, ScalaJSModule:
   def scalaJSVersion = Task("1.20.1")
 
   object test extends ScalaJSTests:
@@ -74,7 +74,7 @@ trait CommonJS extends Common, ScalaJSModule:
 
     def testFramework = Task("munit.Framework")
 
-trait CommonPublish extends PublishModule:
+trait SharedPublish extends PublishModule:
   def publishVersion = "0.0.1-SNAPSHOT"
 
   def pomSettings = PomSettings(
