@@ -23,8 +23,6 @@ import org.scalajs.dom.{HTMLCanvasElement, document}
 
 import florence.*
 import florence.instances.given
-import florence.renderer.*
-import florence.renderer.instances.given
 
 object Example:
 

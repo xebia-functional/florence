@@ -18,20 +18,11 @@ Add Florence to your project (in your `build.sbt`):
 
 ```scala
 // sbt
-libraryDependencies += "com.xebia" %%% "florence-core" % "x.y.z"
+libraryDependencies += "com.xebia" %%% "florence" % "x.y.z"
 // Mill
-def mvnDeps = Seq(mvn"com.xebia::florence-core::x.y.z")
+def mvnDeps = Seq(mvn"com.xebia::florence::x.y.z")
 // Scala-CLI
-//> using dep com.xebia::florence-core::x.y.z
-
-// For JavaScript canvas rendering
-
-// sbt
-libraryDependencies += "com.xebia" %%% "florence-renderer-js" % "x.y.z"
-// Mill
-def mvnDeps = Seq(mvn"com.xebia::florence-renderer-js::x.y.z")
-// Scala-CLI
-//> using dep com.xebia::florence-renderer-js::x.y.z
+//> using dep com.xebia::florence::x.y.z
 ```
 
 ### Creating a Simple Chart
