@@ -151,7 +151,7 @@ val style = lineChartStyle()
 
 There are a couple of sandbox modules, and each is set up to work with Vite.
 
-Regardless of which sandbox you'd like to run, you'll need to have compiled it to JavaScript. You could compile your specific module, e.g. `./mill sandbox.fastLinkJS`, or everything (which isn't terribly inefficient because Mill caches everthing): `./mill __.fastLinkJS`.
+Regardless of which sandbox you'd like to run, you'll need to have compiled it to JavaScript. You could compile your specific module, e.g. `./mill sandbox.fastLinkJS`, or everything (which isn't terribly inefficient because Mill caches everything): `./mill __.fastLinkJS`.
 
 Let's use `sandbox` as the example that you'd like to run. Do the following in your terminal from the root of the project:
 
