@@ -34,12 +34,12 @@ object `sandbox-tyrian` extends SharedJS:
 
   def moduleDeps = Seq(florence.js)
   
-  override def moduleKind = Task(mill.scalajslib.api.ModuleKind.CommonJSModule)
+  override def moduleKind = Task(mill.scalajslib.api.ModuleKind.ESModule)
 
 object sandbox extends SharedJS:
   def moduleDeps = Seq(florence.js)
   
-  override def moduleKind = Task(mill.scalajslib.api.ModuleKind.CommonJSModule)
+  override def moduleKind = Task(mill.scalajslib.api.ModuleKind.ESModule)
 
 // --- traits to apply common settings to modules ---
 

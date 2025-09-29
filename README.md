@@ -147,28 +147,27 @@ val style = lineChartStyle()
   .withSeriesStyle(1, LineSeriesStyle(colour = Some("blue"), lineType = LineType.Dashed))
 ```
 
-## Build and Run
+## Building and running the sandbox/demo projects
 
-### Running with Vite
+There are a couple of sandbox modules, and each is set up to work with Vite.
 
-For a development server with hot reloading:
+Regardless of which sandbox you'd like to run, you'll need to have compiled it to JavaScript. You could compile your specific module, e.g. `./mill sandbox.fastLinkJS`, or everything (which isn't terribly inefficient because Mill caches everthing): `./mill __.fastLinkJS`.
 
-1. Build the JavaScript modules:
-   ```
-   sbt sandboxJS/fastLinkJS
-   ```
+Let's use `sandbox` as the example that you'd like to run. Do the following in your terminal from the root of the project:
 
-2. Install Vite (if not already installed):
-   ```
-   npm install -D vite
-   ```
+```bash
+cd sandbox
+yarn install
+yarn preview
+```
 
-3. Start the Vite development server:
-   ```
-   npx vite
-   ```
+If you look at the output you'll now see an address, like this:
 
-4. Open your browser and go to http://localhost:5173
+```bash
+  ➜  Local:   http://localhost:4173/
+```
+
+Open that link in your browser to view the site.
 
 ## Project Status
 
