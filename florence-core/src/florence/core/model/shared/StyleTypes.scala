@@ -36,28 +36,80 @@ object StyleTypes:
     case Inside, Outside, None
 
   final case class FontSpec(
-      family: String = "sans-serif",
-      size: Double = 12.0,
-      weight: String = "normal"
+      family: String,
+      size: Double,
+      weight: String
   )
+
+  object FontSpec:
+
+    val default: FontSpec =
+      FontSpec(
+        family = "sans-serif",
+        size = 12.0,
+        weight = "normal"
+      )
+
+    def apply(family: String): FontSpec =
+      FontSpec(
+        family,
+        12.0,
+        "normal"
+      )
+
+    def apply(family: String, size: Double): FontSpec =
+      FontSpec(
+        family,
+        size,
+        "normal"
+      )
 
   final case class LineStyle(
       colour: String,
-      width: Double = 1.0,
-      dash: Option[List[Double]] = None
+      width: Double,
+      dash: Option[List[Double]]
   )
+
+  object LineStyle:
+    def apply(colour: String): LineStyle =
+      LineStyle(colour, 1.0, None)
+
+    def apply(colour: String, width: Double): LineStyle =
+      LineStyle(colour, width, None)
+
+    def apply(colour: String, width: Double, dash: List[Double]): LineStyle =
+      LineStyle(colour, width, Some(dash))
 
   final case class Padding(
-      top: Double = 10.0,
-      right: Double = 10.0,
-      bottom: Double = 10.0,
-      left: Double = 10.0
+      top: Double,
+      right: Double,
+      bottom: Double,
+      left: Double
   )
 
+  object Padding:
+
+    val default: Padding =
+      Padding(
+        top = 10.0,
+        right = 10.0,
+        bottom = 10.0,
+        left = 10.0
+      )
+
   final case class Margins(
-      top: Double = 40,
-      right: Double = 40,
-      bottom: Double = 50,
-      left: Double = 50
+      top: Double,
+      right: Double,
+      bottom: Double,
+      left: Double
   )
-end StyleTypes
+
+  object Margins:
+
+    val default: Margins =
+      Margins(
+        top = 40,
+        right = 40,
+        bottom = 50,
+        left = 50
+      )
