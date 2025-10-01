@@ -50,6 +50,7 @@ export florence.renderer.CanvasRenderer
 export florence.renderer.CanvasRendererExtensions.*
 
 object instances:
+
   export florence.core.rendering.LineChartInterpreterInstances.given
   export florence.core.model.styling.WithCommonProps.given
   export florence.renderer.CanvasRenderer.given

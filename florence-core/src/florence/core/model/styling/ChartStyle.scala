@@ -34,7 +34,7 @@ case class CommonStyleProps(
     border: BorderStyle = BorderStyle(),
     title: TitleStyle = TitleStyle(),
     legend: LegendStyle = LegendStyle(),
-    padding: Padding = Padding(),
+    padding: Padding = Padding.default,
     width: Int = 800,
     height: Int = 400,
     margins: Margins = Margins(top = 40, right = 40, bottom = 50, left = 70)
