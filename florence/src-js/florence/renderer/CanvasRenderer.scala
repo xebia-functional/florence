@@ -208,12 +208,13 @@ object CanvasRendererExtensions:
       CanvasRenderer.render(drw.transformed(sx = sx, sy = sy), ctx)
 
   extension (styled: StyledChart[LineChart, LineChartStyle])
+
     def renderToResize(ctx: CanvasRenderingContext2D)(using
         interpreter: Interpreter[StyledChart[LineChart, LineChartStyle], Drawing]
     ): Unit =
-      val cw  = ctx.canvas.width
-      val ch  = ctx.canvas.height
-      val s   = styled.style
+      val cw = ctx.canvas.width
+      val ch = ctx.canvas.height
+      val s  = styled.style
       val s2: LineChartStyle = LineChartStyle(
         commonProps = s.commonProps.copy(width = cw, height = ch),
         xAxis = s.xAxis,
@@ -226,11 +227,12 @@ object CanvasRendererExtensions:
       CanvasRenderer.render(drw, ctx)
 
   extension (chart: LineChart)
+
     def renderWithResize(style: LineChartStyle, ctx: CanvasRenderingContext2D)(using
         interpreter: Interpreter[(LineChart, LineChartStyle), Drawing]
     ): Unit =
-      val cw  = ctx.canvas.width
-      val ch  = ctx.canvas.height
+      val cw = ctx.canvas.width
+      val ch = ctx.canvas.height
       val s2: LineChartStyle = LineChartStyle(
         commonProps = style.commonProps.copy(width = cw, height = ch),
         xAxis = style.xAxis,
