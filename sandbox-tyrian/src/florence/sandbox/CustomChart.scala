@@ -84,4 +84,4 @@ object CustomChart:
   def renderChart(canvas: HTMLCanvasElement): Unit =
     chart
       .withStyling(style)
-      .renderTo(canvas.getContext2D())
+      .renderToFit(canvas.getContext2D())

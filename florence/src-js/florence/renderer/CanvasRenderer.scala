@@ -169,3 +169,38 @@ object CanvasRendererExtensions:
     def render(drawing: Drawing): Unit =
       val ctx = getContext2D()
       CanvasRenderer.render(drawing, ctx)
+
+  import florence.core.dsl.styling.StyledChart
+  import florence.core.model.Chart
+  import florence.core.model.styling.ChartStyle
+  import florence.core.model.styling.WithCommonProps
+
+  extension [C <: Chart, S <: ChartStyle](styled: StyledChart[C, S])
+
+    def renderToFit(ctx: CanvasRenderingContext2D)(using
+        interpreter: Interpreter[StyledChart[C, S], Drawing]
+    ): Unit =
+      val cw     = ctx.canvas.width.toDouble
+      val ch     = ctx.canvas.height.toDouble
+      val propsS = summon[WithCommonProps[ChartStyle]].getCommonProps(styled.style)
+      val w      = propsS.width
+      val h      = propsS.height
+      val sx     = if w == 0 then 1.0 else cw / w.toDouble
+      val sy     = if h == 0 then 1.0 else ch / h.toDouble
+      val drw    = interpreter.interpret(styled)
+      CanvasRenderer.render(drw.transformed(sx = sx, sy = sy), ctx)
+
+  extension [C <: Chart, S <: ChartStyle](chart: C)
+
+    def renderWithFit(style: S, ctx: CanvasRenderingContext2D)(using
+        interpreter: Interpreter[(C, S), Drawing]
+    ): Unit =
+      val cw     = ctx.canvas.width.toDouble
+      val ch     = ctx.canvas.height.toDouble
+      val propsS = summon[WithCommonProps[ChartStyle]].getCommonProps(style)
+      val w      = propsS.width
+      val h      = propsS.height
+      val sx     = if w == 0 then 1.0 else cw / w.toDouble
+      val sy     = if h == 0 then 1.0 else ch / h.toDouble
+      val drw    = interpreter.interpret((chart, style))
+      CanvasRenderer.render(drw.transformed(sx = sx, sy = sy), ctx)
