@@ -14,6 +14,7 @@
           packages = [
             jdkToUse
             millWithJRE
+            pkgs.git
             pkgs.nodejs
             pkgs.yarn
           ];

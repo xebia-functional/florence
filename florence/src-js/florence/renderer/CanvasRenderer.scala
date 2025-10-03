@@ -172,7 +172,9 @@ object CanvasRendererExtensions:
 
   import florence.core.dsl.styling.StyledChart
   import florence.core.model.Chart
+  import florence.core.model.Chart.LineChart
   import florence.core.model.styling.ChartStyle
+  import florence.core.model.styling.ChartStyle.LineChartStyle
   import florence.core.model.styling.WithCommonProps
 
   extension [C <: Chart, S <: ChartStyle](styled: StyledChart[C, S])
@@ -204,3 +206,38 @@ object CanvasRendererExtensions:
       val sy     = if h == 0 then 1.0 else ch / h.toDouble
       val drw    = interpreter.interpret((chart, style))
       CanvasRenderer.render(drw.transformed(sx = sx, sy = sy), ctx)
+
+  extension (styled: StyledChart[LineChart, LineChartStyle])
+    def renderToResize(ctx: CanvasRenderingContext2D)(using
+        interpreter: Interpreter[StyledChart[LineChart, LineChartStyle], Drawing]
+    ): Unit =
+      val cw  = ctx.canvas.width
+      val ch  = ctx.canvas.height
+      val s   = styled.style
+      val s2: LineChartStyle = LineChartStyle(
+        commonProps = s.commonProps.copy(width = cw, height = ch),
+        xAxis = s.xAxis,
+        yAxis = s.yAxis,
+        seriesStyles = s.seriesStyles,
+        defaultSeriesStyle = s.defaultSeriesStyle,
+        showPoints = s.showPoints
+      )
+      val drw = interpreter.interpret(styled.copy(style = s2))
+      CanvasRenderer.render(drw, ctx)
+
+  extension (chart: LineChart)
+    def renderWithResize(style: LineChartStyle, ctx: CanvasRenderingContext2D)(using
+        interpreter: Interpreter[(LineChart, LineChartStyle), Drawing]
+    ): Unit =
+      val cw  = ctx.canvas.width
+      val ch  = ctx.canvas.height
+      val s2: LineChartStyle = LineChartStyle(
+        commonProps = style.commonProps.copy(width = cw, height = ch),
+        xAxis = style.xAxis,
+        yAxis = style.yAxis,
+        seriesStyles = style.seriesStyles,
+        defaultSeriesStyle = style.defaultSeriesStyle,
+        showPoints = style.showPoints
+      )
+      val drw = interpreter.interpret((chart, s2))
+      CanvasRenderer.render(drw, ctx)

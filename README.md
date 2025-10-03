@@ -77,7 +77,10 @@ val canvas = document.getElementById("my-canvas").asInstanceOf[HTMLCanvasElement
 // Render the chart
 styledChart.renderTo(canvas.getContext2D())
 
-// Or fit logical style width/height to the canvas size
+// Fit by redrawing at canvas size (no distortion)
+styledChart.renderToResize(canvas.getContext2D())
+
+// Or non-uniform scale to fill (may distort)
 styledChart.renderToFit(canvas.getContext2D())
 ```
 
