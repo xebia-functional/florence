@@ -186,6 +186,6 @@ object Example:
       .withHeight(400)
       .withMargins(Margins(40, 80, 50, 110))
     val styledChart = chart.withStyling(style)
-    styledChart.renderToResize(canvas.getContext2D())
+    styledChart.renderAtCanvasSize(canvas.getContext2D())
   end renderChart
 end Example

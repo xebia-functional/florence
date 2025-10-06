@@ -178,8 +178,11 @@ object CanvasRendererExtensions:
   import florence.core.model.styling.WithCommonProps
 
   extension [C <: Chart, S <: ChartStyle](styled: StyledChart[C, S])
-
-    def renderToFit(ctx: CanvasRenderingContext2D)(using
+    /** Scale X and Y to fill the canvas
+      * Aspect ratio not preserved
+      * Layout not recomputed
+      */
+    def renderFillCanvas(ctx: CanvasRenderingContext2D)(using
         interpreter: Interpreter[StyledChart[C, S], Drawing]
     ): Unit =
       val cw     = ctx.canvas.width.toDouble
@@ -193,8 +196,10 @@ object CanvasRendererExtensions:
       CanvasRenderer.render(drw.transformed(sx = sx, sy = sy), ctx)
 
   extension [C <: Chart, S <: ChartStyle](chart: C)
-
-    def renderWithFit(style: S, ctx: CanvasRenderingContext2D)(using
+    /** Scale chart and style to fill the canvas
+      * Same behavior as renderFillCanvas
+      */
+    def renderFillCanvasWith(style: S, ctx: CanvasRenderingContext2D)(using
         interpreter: Interpreter[(C, S), Drawing]
     ): Unit =
       val cw     = ctx.canvas.width.toDouble
@@ -208,8 +213,11 @@ object CanvasRendererExtensions:
       CanvasRenderer.render(drw.transformed(sx = sx, sy = sy), ctx)
 
   extension (styled: StyledChart[LineChart, LineChartStyle])
-
-    def renderToResize(ctx: CanvasRenderingContext2D)(using
+    /** Redraw at canvas width and height
+      * No distortion
+      * Layout recomputed for ticks labels and margins
+      */
+    def renderAtCanvasSize(ctx: CanvasRenderingContext2D)(using
         interpreter: Interpreter[StyledChart[LineChart, LineChartStyle], Drawing]
     ): Unit =
       val cw = ctx.canvas.width
@@ -227,8 +235,10 @@ object CanvasRendererExtensions:
       CanvasRenderer.render(drw, ctx)
 
   extension (chart: LineChart)
-
-    def renderWithResize(style: LineChartStyle, ctx: CanvasRenderingContext2D)(using
+    /** Redraw with style at canvas size
+      * Same as renderAtCanvasSize but takes chart and style separately
+      */
+    def renderAtCanvasSizeWith(style: LineChartStyle, ctx: CanvasRenderingContext2D)(using
         interpreter: Interpreter[(LineChart, LineChartStyle), Drawing]
     ): Unit =
       val cw = ctx.canvas.width
