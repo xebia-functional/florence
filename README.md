@@ -80,8 +80,6 @@ styledChart.renderTo(canvas.getContext2D())
 // Fit by redrawing at canvas size (no distortion)
 styledChart.renderAtCanvasSize(canvas.getContext2D())
 
-// Or non-uniform scale to fill (may distort)
-styledChart.renderFillCanvas(canvas.getContext2D())
 ```
 
 ## Customising Charts
