@@ -2,6 +2,8 @@
 
 # TODO: Update this to publish to sonatype central
 
+set -e
+
 ./mill clean
 ./mill __.compile
 ./mill __.test
