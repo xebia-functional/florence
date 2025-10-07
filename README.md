@@ -76,6 +76,10 @@ val canvas = document.getElementById("my-canvas").asInstanceOf[HTMLCanvasElement
 
 // Render the chart
 styledChart.renderTo(canvas.getContext2D())
+
+// Fit by redrawing at canvas size (no distortion)
+styledChart.renderAtCanvasSize(canvas.getContext2D())
+
 ```
 
 ## Customising Charts
@@ -176,3 +180,7 @@ Experimental
 ## License
 
 [License details]
+
+## Dev Environment
+
+- Nix + direnv: enable the dev shell by running `direnv allow` in the repo. The `.envrc` uses `use flake` to load the environment defined in `flake.nix` (JDK 17, Mill, Node/Yarn).
