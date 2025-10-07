@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 ./mill clean
 ./mill __.compile
 ./mill __.test

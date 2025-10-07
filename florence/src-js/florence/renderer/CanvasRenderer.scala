@@ -174,8 +174,6 @@ object CanvasRendererExtensions:
   import florence.core.model.Chart.LineChart
   import florence.core.model.styling.ChartStyle.LineChartStyle
 
-  
-
   extension (styled: StyledChart[LineChart, LineChartStyle])
 
     /** Redraw at canvas width and height
