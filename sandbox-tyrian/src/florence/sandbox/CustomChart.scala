@@ -71,12 +71,12 @@ object CustomChart:
     .withLegend(
       LegendStyle(
         position = LegendPosition.Right,
-        font = FontSpec("sans-serif", 10.0, "normal"),
+        font = FontSpec("sans-serif", 10.0.px, "normal"),
         itemSpacing = 16.0,
         symbolSize = 10.0
       )
     )
-    .withTitle(TitleStyle(font = FontSpec("sans-serif", 16, "bold"), colour = "black"))
+    .withTitle(TitleStyle(font = FontSpec("sans-serif", 16.px, "bold"), colour = "black"))
     .withWidth(800)
     .withHeight(400)
     .withMargins(Margins(40, 80, 50, 110))

@@ -17,6 +17,8 @@
 package florence.core.rendering
 
 import florence.core.model.shared.StyleTypes.*
+import florence.core.model.shared.FontSize
+import florence.core.model.shared.FontSizeSyntax.px
 
 final case class ClearOp(colour: Option[String] = None)
 
@@ -127,7 +129,7 @@ object Drawing:
       content: String,
       x: Double,
       y: Double,
-      fontSize: Double = 12.0,
+      fontSize: FontSize = 12.0.px,
       fontFamily: String = "sans-serif",
       colour: String = "black"
   ): TextOp =

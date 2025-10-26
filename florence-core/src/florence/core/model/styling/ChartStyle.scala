@@ -17,6 +17,7 @@
 package florence.core.model.styling
 
 import florence.core.model.shared.StyleTypes.*
+import florence.core.model.shared.FontSizeSyntax.px
 
 enum ChartStyle:
 
@@ -52,7 +53,7 @@ final case class BorderStyle(
 )
 
 final case class TitleStyle(
-    font: FontSpec = FontSpec("sans-serif", 16.0, "bold"),
+    font: FontSpec = FontSpec("sans-serif", 16.0.px, "bold"),
     colour: String = "black",
     alignment: Alignment = Alignment.Center,
     margin: Double = 20.0
@@ -73,7 +74,7 @@ final case class AxisStyle(
 final case class LegendStyle(
     visible: Boolean = true,
     position: LegendPosition = LegendPosition.Right,
-    font: FontSpec = FontSpec("sans-serif", 12.0, "normal"),
+    font: FontSpec = FontSpec("sans-serif", 12.0.px, "normal"),
     itemSpacing: Double = 10.0,
     symbolSize: Double = 15.0,
     border: Option[BorderStyle] = None,

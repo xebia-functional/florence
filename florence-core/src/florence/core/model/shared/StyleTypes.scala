@@ -16,6 +16,8 @@
 
 package florence.core.model.shared
 
+import florence.core.model.shared.FontSizeSyntax.px
+
 // Shared types for styling and rendering
 
 object StyleTypes:
@@ -37,7 +39,7 @@ object StyleTypes:
 
   final case class FontSpec(
       family: String,
-      size: Double,
+      size: FontSize,
       weight: String
   )
 
@@ -46,18 +48,18 @@ object StyleTypes:
     val default: FontSpec =
       FontSpec(
         family = "sans-serif",
-        size = 12.0,
+        size = 12.0.px,
         weight = "normal"
       )
 
     def apply(family: String): FontSpec =
       FontSpec(
         family,
-        12.0,
+        12.0.px,
         "normal"
       )
 
-    def apply(family: String, size: Double): FontSpec =
+    def apply(family: String, size: FontSize): FontSpec =
       FontSpec(
         family,
         size,

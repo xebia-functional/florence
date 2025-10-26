@@ -26,6 +26,8 @@ import florence.core.model.styling.*
 import florence.core.model.styling.ChartStyle.LineChartStyle
 import florence.core.model.styling.WithCommonProps.*
 import florence.core.model.styling.WithCommonProps.given
+import florence.core.model.shared.FontSizeSyntax.px
+import florence.core.model.shared.FontSize
 
 object LineChartInterpreter:
 
@@ -165,8 +167,8 @@ object LineChartInterpreter:
       LineStyle(yAxisColour, yAxisWidth)
     )
 
-    val xLabelFont = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 12.0, "normal"))
-    val yLabelFont = style.yAxis.labelFont.getOrElse(FontSpec("sans-serif", 12.0, "normal"))
+    val xLabelFont = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 12.0.px, "normal"))
+    val yLabelFont = style.yAxis.labelFont.getOrElse(FontSpec("sans-serif", 12.0.px, "normal"))
 
     val xAxisLabel = chart.xAxis match
       case Axis.LinearScale(label, _, _) => label
@@ -247,7 +249,7 @@ object LineChartInterpreter:
     val xGridColour = style.xAxis.gridLineColour.getOrElse("#e0e0e0")
     val xGridWidth  = style.xAxis.gridLineWidth.getOrElse(1.0)
     val xGridDash   = style.xAxis.gridLineDash
-    val labelFont   = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.0, "normal"))
+    val labelFont   = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.0.px, "normal"))
 
     for i <- categories.indices do
       val x = setup.margins.left + (i + 0.5) * setup.plotWidth / categories.size
@@ -266,7 +268,7 @@ object LineChartInterpreter:
     val xGridColour = style.xAxis.gridLineColour.getOrElse("#e0e0e0")
     val xGridWidth  = style.xAxis.gridLineWidth.getOrElse(1.0)
     val xGridDash   = style.xAxis.gridLineDash
-    val labelFont   = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.0, "normal"))
+    val labelFont   = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.0.px, "normal"))
     val numTicks    = humanFriendlyTickCount(setup.plotWidth, labelFont.size)
 
     for i <- 0 until numTicks do
@@ -286,7 +288,7 @@ object LineChartInterpreter:
     val xGridColour = style.xAxis.gridLineColour.getOrElse("#e0e0e0")
     val xGridWidth  = style.xAxis.gridLineWidth.getOrElse(1.0)
     val xGridDash   = style.xAxis.gridLineDash
-    val labelFont   = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.0, "normal"))
+    val labelFont   = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.0.px, "normal"))
     val range       = setup.xMax - setup.xMin
     val step        = humanFriendlyStep(range / 10.0)
     val start       = Math.ceil(setup.xMin / step) * step
@@ -312,7 +314,7 @@ object LineChartInterpreter:
     val yGridColour = style.yAxis.gridLineColour.getOrElse("#e0e0e0")
     val yGridWidth  = style.yAxis.gridLineWidth.getOrElse(1.0)
     val yGridDash   = style.yAxis.gridLineDash
-    val labelFont   = style.yAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.0, "normal"))
+    val labelFont   = style.yAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.0.px, "normal"))
     val range       = setup.yMax - setup.yMin
     val step        = humanFriendlyStep(range / 5.0)
     val start       = Math.ceil(setup.yMin / step) * step
@@ -337,8 +339,8 @@ object LineChartInterpreter:
       drawLabel(labelText, x - 10, y, labelFont, yAxisColour, Alignment.Right, result)
   end drawYAxisElements
 
-  private def humanFriendlyTickCount(availableWidth: Double, fontSize: Double): Int =
-    val minTickSpacing  = fontSize * 5 // 5 font widths of space
+  private def humanFriendlyTickCount(availableWidth: Double, fontSize: FontSize): Int =
+    val minTickSpacing  = fontSize.value * 5 // 5 font widths of space
     val maxTicks        = Math.max(2, Math.floor(availableWidth / minTickSpacing).toInt)
     val cappedTickCount = Math.min(20, maxTicks)
     val niceTickCounts  = Vector(2, 3, 4, 5, 6, 8, 10, 12, 15, 20)

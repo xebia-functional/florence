@@ -16,5 +16,8 @@
 
 package florence.core.dsl
 
+import florence.core.model.shared.FontSizeSyntax
+
 object ChartDsl:
   export LineChartDsl.*
+  export FontSizeSyntax.*

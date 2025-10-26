@@ -125,7 +125,7 @@ object CanvasRenderer extends Renderer[CanvasRenderingContext2D]:
       }
 
     case TextOp(text, x, y, font, colour, alignment) =>
-      ctx.font = s"${font.weight} ${font.size}px ${font.family}"
+      ctx.font = s"${font.weight} ${font.size} ${font.family}"
       ctx.fillStyle = colour
 
       ctx.textAlign = alignment match
