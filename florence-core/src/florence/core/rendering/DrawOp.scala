@@ -16,9 +16,9 @@
 
 package florence.core.rendering
 
-import florence.core.model.shared.StyleTypes.*
 import florence.core.model.shared.FontSize
 import florence.core.model.shared.FontSizeSyntax.px
+import florence.core.model.shared.StyleTypes.*
 
 final case class ClearOp(colour: Option[String] = None)
 

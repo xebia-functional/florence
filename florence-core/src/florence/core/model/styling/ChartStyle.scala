@@ -16,8 +16,8 @@
 
 package florence.core.model.styling
 
-import florence.core.model.shared.StyleTypes.*
 import florence.core.model.shared.FontSizeSyntax.px
+import florence.core.model.shared.StyleTypes.*
 
 enum ChartStyle:
 

@@ -21,13 +21,13 @@ import scala.collection.mutable
 import florence.core.dsl.styling.LineChartStylingDsl.*
 import florence.core.model.*
 import florence.core.model.Chart.LineChart
+import florence.core.model.shared.FontSize
+import florence.core.model.shared.FontSizeSyntax.px
 import florence.core.model.shared.StyleTypes.*
 import florence.core.model.styling.*
 import florence.core.model.styling.ChartStyle.LineChartStyle
 import florence.core.model.styling.WithCommonProps.*
 import florence.core.model.styling.WithCommonProps.given
-import florence.core.model.shared.FontSizeSyntax.px
-import florence.core.model.shared.FontSize
 
 object LineChartInterpreter:
 
@@ -340,7 +340,7 @@ object LineChartInterpreter:
   end drawYAxisElements
 
   private def humanFriendlyTickCount(availableWidth: Double, fontSize: FontSize): Int =
-    val minTickSpacing  = fontSize.value * 5 // 5 font widths of space
+    val minTickSpacing  = fontSize.toPixels.value * 5 // 5 font widths of space
     val maxTicks        = Math.max(2, Math.floor(availableWidth / minTickSpacing).toInt)
     val cappedTickCount = Math.min(20, maxTicks)
     val niceTickCounts  = Vector(2, 3, 4, 5, 6, 8, 10, 12, 15, 20)

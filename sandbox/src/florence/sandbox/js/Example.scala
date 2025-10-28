@@ -130,7 +130,10 @@ object Example:
           )
         )
         .withYAxis(Axis.LinearScale("Temperature (°C)", None, None))
-    val style = lineChartStyle()
+    val style = lineChartStyle(
+      xAxis = AxisStyle(labelFont = Some(FontSpec("sans-serif", 1.rem, "bold"))),
+      yAxis = AxisStyle(labelFont = Some(FontSpec("sans-serif", 1.rem, "bold")))
+    )
       .withDefaultSeriesStyle(
         LineSeriesStyle(
           markerType = MarkerType.Circle,
@@ -176,12 +179,12 @@ object Example:
       .withLegend(
         LegendStyle(
           position = LegendPosition.Right,
-          font = FontSpec("sans-serif", 10.0.px, "normal"),
+          font = FontSpec("sans-serif", 10.px, "normal"),
           itemSpacing = 16.0,
           symbolSize = 10.0
         )
       )
-      .withTitle(TitleStyle(font = FontSpec("sans-serif", 16.px, "bold"), colour = "black"))
+      .withTitle(TitleStyle(font = FontSpec("sans-serif", 2.rem, "bold"), colour = "black"))
       .withWidth(800)
       .withHeight(400)
       .withMargins(Margins(40, 80, 50, 110))
