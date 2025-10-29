@@ -1,16 +1,17 @@
 package florence.core.model.shared
 
-import florence.core.model.shared.FontLengthUnit.*
+import florence.core.model.shared.FontLengthUnit.Absolute.*
+import florence.core.model.shared.FontLengthUnit.RootRelative.*
 
 /** A pixel compatible font is any font whose size that can be converted into pixel units
   */
-trait PixelCompatibleFont[-Unit <: FontLengthUnit]:
+trait PixelCompatibleFont[-LengthUnit <: FontLengthUnit]:
 
   /** @param value font size value
     * @param unit font size unit
     * @return the font size in pixels
     */
-  def toPixels(value: Double, unit: Unit): Double
+  def toPixels(value: Double, unit: LengthUnit): Double
 
 object PixelCompatibleFont:
 
@@ -27,7 +28,8 @@ object PixelCompatibleFont:
           case Pc => value * toPixels(12, Pt)
           case Pt => value * toPixels(1, In) / 72
 
-  trait RelativeCompatible[-Unit <: FontLengthUnit.RootRelative] extends PixelCompatibleFont[Unit]:
+  trait RelativeCompatible[-LengthUnit <: FontLengthUnit.RootRelative]
+      extends PixelCompatibleFont[LengthUnit]:
 
     /** @return a baseline font size that will be used to compute the amount of pixels for a given relative font size.
       * For example, an implementation of the 'rem' font size in the context of HTML, would take the font size of the root element and return it as the output of this method.
@@ -35,6 +37,6 @@ object PixelCompatibleFont:
       */
     def getBaselineFontSize: Double
 
-    override final def toPixels(value: Double, unit: Unit): Double =
+    override final def toPixels(value: Double, unit: LengthUnit): Double =
       unit match
         case Rem => value * getBaselineFontSize
