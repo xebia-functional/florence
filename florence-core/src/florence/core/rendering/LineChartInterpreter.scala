@@ -29,7 +29,7 @@ import florence.core.model.styling.ChartStyle.LineChartStyle
 import florence.core.model.styling.WithCommonProps.*
 import florence.core.model.styling.WithCommonProps.given
 
-final class LineChartInterpreter(val textMeasurer: TextMeasurer):
+final class LineChartInterpreter(textMeasurer: TextMeasurer):
 
   /** The length of a tick mark line in pixels
     * (should this be configurable by the user?)
@@ -253,6 +253,8 @@ final class LineChartInterpreter(val textMeasurer: TextMeasurer):
     if style.yAxis.gridLines then maxYLabelWidth = drawYAxisElements(setup, style, result)
     (maxXLabelHeight, maxYLabelWidth, result.result())
 
+  /** Draws x-axis tick marks and labels, and returns the maximum tick label height in pixels
+    */
   private def drawXAxisElements(
       chart: LineChart,
       setup: ChartSetup,
@@ -268,6 +270,8 @@ final class LineChartInterpreter(val textMeasurer: TextMeasurer):
         drawNumericXAxis(setup, style, result)
   end drawXAxisElements
 
+  /** Draws x-axis tick marks and labels for a categorical scale, and returns the maximum tick label height in pixels
+    */
   private def drawCategoricalXAxis(
       categories: Vector[String],
       setup: ChartSetup,
@@ -302,6 +306,8 @@ final class LineChartInterpreter(val textMeasurer: TextMeasurer):
       )
     maxXLabelHeight
 
+  /** Draws x-axis tick marks and labels for a categorical scale, and returns the maximum tick label height in pixels
+    */
   private def drawAutoCategoricalXAxis(
       setup: ChartSetup,
       style: LineChartStyle,
@@ -343,6 +349,8 @@ final class LineChartInterpreter(val textMeasurer: TextMeasurer):
       )
     maxXLabelHeight
 
+  /** Draws x-axis tick marks and labels for a numeric scale, and returns the maximum tick label height in pixels
+    */
   private def drawNumericXAxis(
       setup: ChartSetup,
       style: LineChartStyle,
@@ -382,6 +390,8 @@ final class LineChartInterpreter(val textMeasurer: TextMeasurer):
       )
     maxXLabelHeight
 
+  /** Draws y-axis tick marks and labels for a numeric scale, and returns the maximum tick label width in pixels
+    */
   private def drawYAxisElements(
       setup: ChartSetup,
       style: LineChartStyle,
