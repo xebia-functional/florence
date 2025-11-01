@@ -21,15 +21,26 @@ import scala.collection.mutable
 import florence.core.dsl.styling.LineChartStylingDsl.*
 import florence.core.model.*
 import florence.core.model.Chart.LineChart
-import florence.core.model.shared.FontSize
 import florence.core.model.shared.FontSizeSyntax.px
 import florence.core.model.shared.StyleTypes.*
+import florence.core.model.shared.TextBaseline
 import florence.core.model.styling.*
 import florence.core.model.styling.ChartStyle.LineChartStyle
 import florence.core.model.styling.WithCommonProps.*
 import florence.core.model.styling.WithCommonProps.given
 
-object LineChartInterpreter:
+final class LineChartInterpreter(val textMeasurer: TextMeasurer):
+
+  /** The length of a tick mark line in pixels
+    * (should this be configurable by the user?)
+    */
+  private val tickMarkLength = 5.0
+
+  /** The default gap between the main chart components in pixels
+    * (e.g., title, labels, tick numbers, plot)
+    * (should this be configurable by the user?)
+    */
+  private val componentGap = 5.0
 
   def interpretLineChart(
       chart: LineChart,
@@ -39,8 +50,17 @@ object LineChartInterpreter:
     val operations = Vector.newBuilder[DrawOp]
     operations ++= drawBackground(style)
     operations ++= drawTitle(chart, chartSetup, style)
-    operations ++= drawAxes(chart, chartSetup, style)
-    operations ++= drawGridAndLabels(chart, chartSetup, style)
+
+    val gridAndLabels = drawGridAndLabels(chart, chartSetup, style)
+    operations ++= gridAndLabels.operations
+
+    operations ++= drawAxes(
+      chart,
+      chartSetup,
+      style,
+      gridAndLabels.maxXLabelHeight,
+      gridAndLabels.maxYLabelWidth
+    )
     operations ++= drawSeries(chart, chartSetup, style)
     operations ++= drawLegend(chart, chartSetup, style)
     Drawing(operations.result().toList)
@@ -128,14 +148,15 @@ object LineChartInterpreter:
       result += TextOp(
         text = title,
         x = setup.width / 2,
-        y = titleStyle.margin.max(setup.margins.top / 2),
+        y = setup.margins.top - (componentGap + titleStyle.margin),
         font = FontSpec(
           family = titleStyle.font.family,
           size = titleStyle.font.size,
           weight = titleStyle.font.weight
         ),
         colour = titleStyle.colour,
-        alignment = titleStyle.alignment
+        alignment = titleStyle.alignment,
+        baseline = TextBaseline.Bottom
       )
     }
     result.result()
@@ -143,7 +164,9 @@ object LineChartInterpreter:
   private def drawAxes(
       chart: LineChart,
       setup: ChartSetup,
-      style: LineChartStyle
+      style: LineChartStyle,
+      maxXLabelHeight: Double,
+      maxYLabelWidth: Double
   ): Vector[DrawOp] =
     val result      = Vector.newBuilder[DrawOp]
     val xAxisColour = style.xAxis.lineColour.getOrElse("black")
@@ -178,16 +201,19 @@ object LineChartInterpreter:
       case Axis.LinearScale(label, _, _) => label
       case Axis.CategoryScale(label, _)  => label
 
+    val xOrigin = setup.margins.left                  // x-position of the origin of the plot
+    val yOrigin = setup.height - setup.margins.bottom // y-position of the origin of the plot
+
     result += TextOp(
       xAxisLabel,
-      setup.margins.left + setup.plotWidth / 2,
-      setup.height - (setup.margins.bottom / 3),
+      xOrigin + setup.plotWidth / 2,
+      // accounts for the tick marks and tick label sizes with their gaps in between
+      yOrigin + tickMarkLength + componentGap + maxXLabelHeight + componentGap,
       xLabelFont,
       xAxisColour,
-      Alignment.Center
+      Alignment.Center,
+      TextBaseline.Hanging
     )
-
-    val yLabelOffset = 25.0
 
     // Add y-axis label using GroupOp: place + rotate -90
     result += GroupOp(
@@ -198,13 +224,15 @@ object LineChartInterpreter:
           0,
           yLabelFont,
           yAxisColour,
-          Alignment.Center
+          Alignment.Center,
+          TextBaseline.Bottom
         )
       ),
       transform = Some(
         Transform(
-          translateX = setup.margins.left - yLabelOffset,
-          translateY = setup.margins.top + setup.plotHeight / 2,
+          // accounts for the tick marks and tick label sizes with their gaps in between
+          translateX = xOrigin - (tickMarkLength + componentGap + maxYLabelWidth + componentGap),
+          translateY = yOrigin - setup.plotHeight / 2,
           rotation = -Math.PI / 2
         )
       )
@@ -217,18 +245,20 @@ object LineChartInterpreter:
       chart: LineChart,
       setup: ChartSetup,
       style: LineChartStyle
-  ): Vector[DrawOp] =
-    val result = Vector.newBuilder[DrawOp]
-    if style.xAxis.gridLines then drawXAxisElements(chart, setup, style, result)
-    if style.yAxis.gridLines then drawYAxisElements(setup, style, result)
-    result.result()
+  ): (maxXLabelHeight: Double, maxYLabelWidth: Double, operations: Vector[DrawOp]) =
+    val result          = Vector.newBuilder[DrawOp]
+    var maxXLabelHeight = componentGap
+    var maxYLabelWidth  = componentGap
+    if style.xAxis.gridLines then maxXLabelHeight = drawXAxisElements(chart, setup, style, result)
+    if style.yAxis.gridLines then maxYLabelWidth = drawYAxisElements(setup, style, result)
+    (maxXLabelHeight, maxYLabelWidth, result.result())
 
   private def drawXAxisElements(
       chart: LineChart,
       setup: ChartSetup,
       style: LineChartStyle,
       result: mutable.ReusableBuilder[DrawOp, Vector[DrawOp]]
-  ): Unit =
+  ): Double =
     chart.xAxis match
       case Axis.CategoryScale(_, Some(categories)) =>
         drawCategoricalXAxis(categories, setup, style, result)
@@ -243,7 +273,7 @@ object LineChartInterpreter:
       setup: ChartSetup,
       style: LineChartStyle,
       result: mutable.ReusableBuilder[DrawOp, Vector[DrawOp]]
-  ): Unit =
+  ): Double =
     val xAxisColour = style.xAxis.lineColour.getOrElse("black")
     val xAxisWidth  = style.xAxis.lineWidth.getOrElse(2.0)
     val xGridColour = style.xAxis.gridLineColour.getOrElse("#e0e0e0")
@@ -251,38 +281,73 @@ object LineChartInterpreter:
     val xGridDash   = style.xAxis.gridLineDash
     val labelFont   = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.0.px, "normal"))
 
+    var maxXLabelHeight = 0.0
     for i <- categories.indices do
-      val x = setup.margins.left + (i + 0.5) * setup.plotWidth / categories.size
-      val y = setup.height - setup.margins.bottom
-      drawVerticalTickMark(x, y, 5, xAxisColour, xAxisWidth, result)
+      val x             = setup.margins.left + (i + 0.5) * setup.plotWidth / categories.size
+      val y             = setup.height - setup.margins.bottom // y-position of the axis line
+      val tickLabelYPos = y + tickMarkLength + componentGap   // y-position of the tick label
+      drawVerticalTickMark(x, y, tickMarkLength, xAxisColour, xAxisWidth, result)
       drawVerticalGridLine(x, setup.margins.top, y, xGridColour, xGridWidth, xGridDash, result)
-      drawLabel(categories(i), x, y + 15, labelFont, xAxisColour, Alignment.Center, result)
+      val labelText = categories(i)
+      maxXLabelHeight = maxXLabelHeight.max(textMeasurer.measureHeight(labelText, labelFont))
+      drawLabel(
+        labelText,
+        x,
+        tickLabelYPos,
+        labelFont,
+        xAxisColour,
+        Alignment.Center,
+        TextBaseline.Hanging, // top of the label text is at (x, tickLabelYPos)
+        result
+      )
+    maxXLabelHeight
 
   private def drawAutoCategoricalXAxis(
       setup: ChartSetup,
       style: LineChartStyle,
       result: mutable.ReusableBuilder[DrawOp, Vector[DrawOp]]
-  ): Unit =
+  ): Double =
     val xAxisColour = style.xAxis.lineColour.getOrElse("black")
     val xAxisWidth  = style.xAxis.lineWidth.getOrElse(2.0)
     val xGridColour = style.xAxis.gridLineColour.getOrElse("#e0e0e0")
     val xGridWidth  = style.xAxis.gridLineWidth.getOrElse(1.0)
     val xGridDash   = style.xAxis.gridLineDash
     val labelFont   = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.0.px, "normal"))
-    val numTicks    = humanFriendlyTickCount(setup.plotWidth, labelFont.size)
 
+    /** humanFriendlyTickCount is computed with respect to the font size of the tick labels.
+      * All tick labels within this method are part of the sequence: "0", "1", ..., (numTicks - 1).toString
+      *
+      * This is why measure the font size as the height of a single number from this sequence
+      */
+    val labelFontSize = textMeasurer.measureHeight("1", labelFont)
+    val numTicks      = humanFriendlyTickCount(setup.plotWidth, labelFontSize)
+
+    var maxXLabelHeight = 0.0
     for i <- 0 until numTicks do
-      val x = setup.margins.left + i * setup.plotWidth / (numTicks - 1).max(1)
-      val y = setup.height - setup.margins.bottom
-      drawVerticalTickMark(x, y, 5, xAxisColour, xAxisWidth, result)
+      val x             = setup.margins.left + i * setup.plotWidth / (numTicks - 1).max(1)
+      val y             = setup.height - setup.margins.bottom // y-position of the axis line
+      val tickLabelYPos = y + tickMarkLength + componentGap   // y-position of the tick label
+      drawVerticalTickMark(x, y, tickMarkLength, xAxisColour, xAxisWidth, result)
       drawVerticalGridLine(x, setup.margins.top, y, xGridColour, xGridWidth, xGridDash, result)
-      drawLabel((i + 1).toString, x, y + 15, labelFont, xAxisColour, Alignment.Center, result)
+      val labelText = (i + 1).toString
+      maxXLabelHeight = maxXLabelHeight.max(textMeasurer.measureHeight(labelText, labelFont))
+      drawLabel(
+        labelText,
+        x,
+        tickLabelYPos,
+        labelFont,
+        xAxisColour,
+        Alignment.Center,
+        TextBaseline.Hanging, // top of the label text is at (x, tickLabelYPos)
+        result
+      )
+    maxXLabelHeight
 
   private def drawNumericXAxis(
       setup: ChartSetup,
       style: LineChartStyle,
       result: mutable.ReusableBuilder[DrawOp, Vector[DrawOp]]
-  ): Unit =
+  ): Double =
     val xAxisColour = style.xAxis.lineColour.getOrElse("black")
     val xAxisWidth  = style.xAxis.lineWidth.getOrElse(2.0)
     val xGridColour = style.xAxis.gridLineColour.getOrElse("#e0e0e0")
@@ -295,20 +360,33 @@ object LineChartInterpreter:
     val end         = Math.floor(setup.xMax / step) * step
     val numSteps    = ((end - start) / step).toInt + 1
 
+    var maxXLabelHeight = 0.0
     for i <- 0 until numSteps do
-      val value = start + i * step
-      val x     = setup.transformX(value)
-      val y     = setup.height - setup.margins.bottom
-      drawVerticalTickMark(x, y, 5, xAxisColour, xAxisWidth, result)
+      val value         = start + i * step
+      val x             = setup.transformX(value)
+      val y             = setup.height - setup.margins.bottom // y-position of the axis line
+      val tickLabelYPos = y + tickMarkLength + componentGap   // y-position of the tick label
+      drawVerticalTickMark(x, y, tickMarkLength, xAxisColour, xAxisWidth, result)
       drawVerticalGridLine(x, setup.margins.top, y, xGridColour, xGridWidth, xGridDash, result)
       val labelText = if step >= 1.0 then f"$value%.0f" else f"$value%.1f"
-      drawLabel(labelText, x, y + 15, labelFont, xAxisColour, Alignment.Center, result)
+      maxXLabelHeight = maxXLabelHeight.max(textMeasurer.measureHeight(labelText, labelFont))
+      drawLabel(
+        labelText,
+        x,
+        tickLabelYPos,
+        labelFont,
+        xAxisColour,
+        Alignment.Center,
+        TextBaseline.Hanging, // top of the label text is at (x, tickLabelYPos)
+        result
+      )
+    maxXLabelHeight
 
   private def drawYAxisElements(
       setup: ChartSetup,
       style: LineChartStyle,
       result: mutable.ReusableBuilder[DrawOp, Vector[DrawOp]]
-  ): Unit =
+  ): Double =
     val yAxisColour = style.yAxis.lineColour.getOrElse("black")
     val yAxisWidth  = style.yAxis.lineWidth.getOrElse(2.0)
     val yGridColour = style.yAxis.gridLineColour.getOrElse("#e0e0e0")
@@ -321,11 +399,13 @@ object LineChartInterpreter:
     val end         = Math.floor(setup.yMax / step) * step
     val numSteps    = ((end - start) / step).toInt + 1
 
+    var maxLabelWidth = 0.0
     for i <- 0 until numSteps do
-      val value = start + i * step
-      val x     = setup.margins.left
-      val y     = setup.transformY(value)
-      drawHorizontalTickMark(x, y, 5, yAxisColour, yAxisWidth, result)
+      val value         = start + i * step
+      val x             = setup.margins.left                  // x-position of the axis line
+      val y             = setup.transformY(value)
+      val tickLabelXPos = x - (tickMarkLength + componentGap) // x-position of the tick label
+      drawHorizontalTickMark(x, y, tickMarkLength, yAxisColour, yAxisWidth, result)
       drawHorizontalGridLine(
         x,
         setup.width - setup.margins.right,
@@ -336,11 +416,22 @@ object LineChartInterpreter:
         result
       )
       val labelText = if step >= 1.0 then f"$value%.0f" else f"$value%.1f"
-      drawLabel(labelText, x - 10, y, labelFont, yAxisColour, Alignment.Right, result)
+      maxLabelWidth = maxLabelWidth.max(textMeasurer.measureWidth(labelText, labelFont))
+      drawLabel(
+        labelText,
+        tickLabelXPos,
+        y,
+        labelFont,
+        yAxisColour,
+        Alignment.Right,
+        TextBaseline.Middle, // the center of the label text is at (tickLabelXPos, y)
+        result
+      )
+    maxLabelWidth
   end drawYAxisElements
 
-  private def humanFriendlyTickCount(availableWidth: Double, fontSize: FontSize): Int =
-    val minTickSpacing  = fontSize.toPixels.value * 5 // 5 font widths of space
+  private def humanFriendlyTickCount(availableWidth: Double, fontSize: Double): Int =
+    val minTickSpacing  = fontSize * 5 // 5 font widths of space
     val maxTicks        = Math.max(2, Math.floor(availableWidth / minTickSpacing).toInt)
     val cappedTickCount = Math.min(20, maxTicks)
     val niceTickCounts  = Vector(2, 3, 4, 5, 6, 8, 10, 12, 15, 20)
@@ -419,6 +510,7 @@ object LineChartInterpreter:
       font: FontSpec,
       color: String,
       alignment: Alignment,
+      baseline: TextBaseline,
       result: mutable.ReusableBuilder[DrawOp, Vector[DrawOp]]
   ): Unit =
     result += TextOp(
@@ -427,7 +519,8 @@ object LineChartInterpreter:
       y,
       font,
       color,
-      alignment
+      alignment,
+      baseline
     )
 
   private def humanFriendlyStep(roughStep: Double): Double =
@@ -608,7 +701,8 @@ object LineChartInterpreter:
             legendStyle.font.weight
           ),
           colour,
-          Alignment.Left
+          Alignment.Left,
+          TextBaseline.Alphabetic
         )
       }
     end if
@@ -627,16 +721,20 @@ end LineChartInterpreter
 
 object LineChartInterpreterInstances:
 
-  given lineChartInterpreter: Interpreter[LineChart, Drawing] with
+  given lineChartInterpreter(using textMeasurer: TextMeasurer): Interpreter[LineChart, Drawing] with
     def interpret(chart: LineChart): Drawing =
-      LineChartInterpreter.interpretLineChart(chart)
+      LineChartInterpreter(textMeasurer).interpretLineChart(chart)
 
-  given lineChartWithStyleInterpreter: Interpreter[(LineChart, LineChartStyle), Drawing] with
+  given lineChartWithStyleInterpreter(using
+      textMeasurer: TextMeasurer
+  ): Interpreter[(LineChart, LineChartStyle), Drawing] with
 
     def interpret(args: (LineChart, LineChartStyle)): Drawing =
       val (chart, style) = args
-      LineChartInterpreter.interpretLineChart(chart, style)
+      LineChartInterpreter(textMeasurer).interpretLineChart(chart, style)
 
-  given styledLineChartInterpreter: Interpreter[StyledLineChart, Drawing] with
+  given styledLineChartInterpreter(using
+      textMeasurer: TextMeasurer
+  ): Interpreter[StyledLineChart, Drawing] with
     def interpret(styledChart: StyledLineChart): Drawing =
-      LineChartInterpreter.interpretLineChart(styledChart.chart, styledChart.style)
+      LineChartInterpreter(textMeasurer).interpretLineChart(styledChart.chart, styledChart.style)

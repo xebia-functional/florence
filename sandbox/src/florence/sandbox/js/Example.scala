@@ -184,10 +184,12 @@ object Example:
           symbolSize = 10.0
         )
       )
-      .withTitle(TitleStyle(font = FontSpec("sans-serif", 2.rem, "bold"), colour = "black"))
+      .withTitle(
+        TitleStyle(font = FontSpec("sans-serif", 2.rem, "bold"), colour = "black", margin = 10)
+      )
       .withWidth(800)
       .withHeight(400)
-      .withMargins(Margins(40, 80, 50, 110))
+      .withMargins(Margins(60, 80, 50, 110))
     val styledChart = chart.withStyling(style)
     styledChart.renderAtCanvasSize(canvas.getContext2D())
   end renderChart
