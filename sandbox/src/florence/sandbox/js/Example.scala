@@ -40,8 +40,8 @@ object Example:
     if canvas == null then
       val newCanvas = document.createElement("canvas").asInstanceOf[HTMLCanvasElement]
       newCanvas.id = "chart-canvas"
-      newCanvas.width = 800
-      newCanvas.height = 400
+      newCanvas.width = 1100
+      newCanvas.height = 800
       document.body.appendChild(newCanvas)
       renderChart(newCanvas)
     else renderChart(canvas)
@@ -132,7 +132,7 @@ object Example:
         .withYAxis(Axis.LinearScale("Temperature (°C)", None, None))
     val style = lineChartStyle(
       xAxis = AxisStyle(labelFont = Some(FontSpec("sans-serif", 1.rem, "bold"))),
-      yAxis = AxisStyle(labelFont = Some(FontSpec("sans-serif", 1.rem, "bold")))
+      yAxis = AxisStyle(labelFont = Some(FontSpec("sans-serif", 2.rem, "bold")))
     )
       .withDefaultSeriesStyle(
         LineSeriesStyle(
@@ -185,10 +185,10 @@ object Example:
         )
       )
       .withTitle(
-        TitleStyle(font = FontSpec("sans-serif", 2.rem, "bold"), colour = "black", margin = 10)
+        TitleStyle(font = FontSpec("sans-serif", 3.rem, "bold"), colour = "black", margin = 5)
       )
-      .withWidth(800)
-      .withHeight(400)
+      .withWidth(1100)
+      .withHeight(800)
       .withMargins(Margins(60, 80, 50, 110))
     val styledChart = chart.withStyling(style)
     styledChart.renderAtCanvasSize(canvas.getContext2D())

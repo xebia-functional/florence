@@ -190,8 +190,8 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
       LineStyle(yAxisColour, yAxisWidth)
     )
 
-    val xLabelFont = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 12.0.px, "normal"))
-    val yLabelFont = style.yAxis.labelFont.getOrElse(FontSpec("sans-serif", 12.0.px, "normal"))
+    val xLabelFont = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 12.px, "normal"))
+    val yLabelFont = style.yAxis.labelFont.getOrElse(FontSpec("sans-serif", 12.px, "normal"))
 
     val xAxisLabel = chart.xAxis match
       case Axis.LinearScale(label, _, _) => label
@@ -283,7 +283,7 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
     val xGridColour = style.xAxis.gridLineColour.getOrElse("#e0e0e0")
     val xGridWidth  = style.xAxis.gridLineWidth.getOrElse(1.0)
     val xGridDash   = style.xAxis.gridLineDash
-    val labelFont   = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.0.px, "normal"))
+    val labelFont   = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.px, "normal"))
 
     var maxXLabelHeight = 0.0
     for i <- categories.indices do
@@ -318,7 +318,7 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
     val xGridColour = style.xAxis.gridLineColour.getOrElse("#e0e0e0")
     val xGridWidth  = style.xAxis.gridLineWidth.getOrElse(1.0)
     val xGridDash   = style.xAxis.gridLineDash
-    val labelFont   = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.0.px, "normal"))
+    val labelFont   = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.px, "normal"))
 
     /** humanFriendlyTickCount is computed with respect to the font size of the tick labels.
       * All tick labels within this method are part of the sequence: "0", "1", ..., (numTicks - 1).toString
@@ -361,7 +361,7 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
     val xGridColour = style.xAxis.gridLineColour.getOrElse("#e0e0e0")
     val xGridWidth  = style.xAxis.gridLineWidth.getOrElse(1.0)
     val xGridDash   = style.xAxis.gridLineDash
-    val labelFont   = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.0.px, "normal"))
+    val labelFont   = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.px, "normal"))
     val range       = setup.xMax - setup.xMin
     val step        = humanFriendlyStep(range / 10.0)
     val start       = Math.ceil(setup.xMin / step) * step
@@ -402,7 +402,7 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
     val yGridColour = style.yAxis.gridLineColour.getOrElse("#e0e0e0")
     val yGridWidth  = style.yAxis.gridLineWidth.getOrElse(1.0)
     val yGridDash   = style.yAxis.gridLineDash
-    val labelFont   = style.yAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.0.px, "normal"))
+    val labelFont   = style.yAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.px, "normal"))
     val range       = setup.yMax - setup.yMin
     val step        = humanFriendlyStep(range / 5.0)
     val start       = Math.ceil(setup.yMin / step) * step

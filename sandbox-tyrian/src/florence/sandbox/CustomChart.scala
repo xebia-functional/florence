@@ -71,7 +71,7 @@ object CustomChart:
     .withLegend(
       LegendStyle(
         position = LegendPosition.Right,
-        font = FontSpec("sans-serif", 10.0.px, "normal"),
+        font = FontSpec("sans-serif", 10.px, "normal"),
         itemSpacing = 16.0,
         symbolSize = 10.0
       )

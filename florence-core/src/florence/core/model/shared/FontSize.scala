@@ -1,42 +1,34 @@
 package florence.core.model.shared
 
-import florence.core.model.shared.FontLengthUnit.Absolute.*
-import florence.core.model.shared.FontLengthUnit.RootRelative.*
-
-/** @param value font size value
-  * @param unit font size unit
-  */
-final case class FontSize(value: Double, unit: FontLengthUnit):
-  override def toString: String =
-    s"$value${unit.name}"
-
-object FontSizeSyntax:
-
-  extension (value: Double)
-    def rem: FontSize = FontSize(value, Rem)
-    def px: FontSize  = FontSize(value, Px)
-    def cm: FontSize  = FontSize(value, Cm)
-    def mm: FontSize  = FontSize(value, Mm)
-    def q: FontSize   = FontSize(value, Q)
-    def in: FontSize  = FontSize(value, In)
-    def pc: FontSize  = FontSize(value, Pc)
-    def pt: FontSize  = FontSize(value, Pt)
-
 /** Some of the font length units specified by https://developer.mozilla.org/en-US/docs/Web/CSS/length#syntax
   */
-sealed trait FontLengthUnit:
-  def name: String
+enum FontSize(unit: String):
+  self =>
+  case Px(value: Int)     extends FontSize("px")
+  case Cm(value: Double)  extends FontSize("cm")
+  case Mm(value: Double)  extends FontSize("mm")
+  case Q(value: Double)   extends FontSize("Q")
+  case In(value: Double)  extends FontSize("in")
+  case Pc(value: Double)  extends FontSize("pc")
+  case Rem(value: Double) extends FontSize("rem")
 
-object FontLengthUnit:
+  override def toString: String =
+    self match
+      case Px(value)  => s"$value$unit"
+      case Cm(value)  => s"$value$unit"
+      case Mm(value)  => s"$value$unit"
+      case Q(value)   => s"$value$unit"
+      case In(value)  => s"$value$unit"
+      case Pc(value)  => s"$value$unit"
+      case Rem(value) => s"$value$unit"
 
-  enum RootRelative(override val name: String) extends FontLengthUnit:
-    case Rem extends RootRelative("rem")
+object FontSizeSyntax:
+  extension (value: Int) def px: FontSize = FontSize.Px(value)
 
-  enum Absolute(override val name: String) extends FontLengthUnit:
-    case Px extends Absolute("px")
-    case Cm extends Absolute("cm")
-    case Mm extends Absolute("mm")
-    case Q  extends Absolute("Q")
-    case In extends Absolute("in")
-    case Pc extends Absolute("pc")
-    case Pt extends Absolute("pt")
+  extension (value: Double)
+    def cm: FontSize  = FontSize.Cm(value)
+    def mm: FontSize  = FontSize.Mm(value)
+    def q: FontSize   = FontSize.Q(value)
+    def in: FontSize  = FontSize.In(value)
+    def pc: FontSize  = FontSize.Pc(value)
+    def rem: FontSize = FontSize.Rem(value)

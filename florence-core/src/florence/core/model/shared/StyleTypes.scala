@@ -48,14 +48,14 @@ object StyleTypes:
     val default: FontSpec =
       FontSpec(
         family = "sans-serif",
-        size = 12.0.px,
+        size = 12.px,
         weight = "normal"
       )
 
     def apply(family: String): FontSpec =
       FontSpec(
         family,
-        12.0.px,
+        12.px,
         "normal"
       )
 

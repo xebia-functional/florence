@@ -130,7 +130,7 @@ object Drawing:
       content: String,
       x: Double,
       y: Double,
-      fontSize: FontSize = 12.0.px,
+      fontSize: FontSize = 12.px,
       fontFamily: String = "sans-serif",
       colour: String = "black"
   ): TextOp =
