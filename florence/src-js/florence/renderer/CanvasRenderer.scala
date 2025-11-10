@@ -124,8 +124,9 @@ object CanvasRenderer extends Renderer[CanvasRenderingContext2D]:
         ctx.stroke()
       }
 
-    case TextOp(text, x, y, font, colour, alignment) =>
-      ctx.font = s"${font.weight} ${font.size}px ${font.family}"
+    case TextOp(text, x, y, font, colour, alignment, baseline) =>
+      ctx.font = s"${font.weight} ${font.size} ${font.family}"
+      ctx.textBaseline = baseline.name
       ctx.fillStyle = colour
 
       ctx.textAlign = alignment match
@@ -180,7 +181,18 @@ object CanvasRendererExtensions:
       * No distortion
       * Layout recomputed for ticks labels and margins
       */
-    def renderAtCanvasSize(ctx: CanvasRenderingContext2D)(using
+    def renderAtCanvasSize(ctx: CanvasRenderingContext2D): Unit =
+      renderAtCanvasSizeImpl(ctx)(using
+        LineChartInterpreterInstances.styledLineChartInterpreter(using
+          CanvasTextMeasurer(ctx)
+        )
+      )
+
+    /** Redraw at canvas width and height
+      * No distortion
+      * Layout recomputed for ticks labels and margins
+      */
+    private def renderAtCanvasSizeImpl(ctx: CanvasRenderingContext2D)(using
         interpreter: Interpreter[StyledChart[LineChart, LineChartStyle], Drawing]
     ): Unit =
       val cw = ctx.canvas.width
@@ -202,8 +214,18 @@ object CanvasRendererExtensions:
     /** Redraw with style at canvas size
       * Same as renderAtCanvasSize but takes chart and style separately
       */
-    def renderAtCanvasSizeWith(style: LineChartStyle, ctx: CanvasRenderingContext2D)(using
-        interpreter: Interpreter[(LineChart, LineChartStyle), Drawing]
+    def renderAtCanvasSizeWith(style: LineChartStyle, ctx: CanvasRenderingContext2D): Unit =
+      renderAtCanvasSizeWithImpl(style, ctx)(using
+        LineChartInterpreterInstances.lineChartWithStyleInterpreter(using
+          CanvasTextMeasurer(ctx)
+        )
+      )
+
+    /** Redraw with style at canvas size
+      * Same as renderAtCanvasSize but takes chart and style separately
+      */
+    private def renderAtCanvasSizeWithImpl(style: LineChartStyle, ctx: CanvasRenderingContext2D)(
+        using interpreter: Interpreter[(LineChart, LineChartStyle), Drawing]
     ): Unit =
       val cw = ctx.canvas.width
       val ch = ctx.canvas.height

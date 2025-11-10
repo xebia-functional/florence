@@ -16,7 +16,9 @@
 
 package florence.core.rendering
 
+import florence.core.model.shared.FontSizeSyntax.px
 import florence.core.model.shared.StyleTypes.*
+import florence.core.model.shared.{FontSize, TextBaseline}
 
 final case class ClearOp(colour: Option[String] = None)
 
@@ -68,7 +70,8 @@ final case class TextOp(
     y: Double,
     font: FontSpec,
     colour: String,
-    alignment: Alignment
+    alignment: Alignment,
+    baseline: TextBaseline
 )
 
 final case class GroupOp(
@@ -127,11 +130,19 @@ object Drawing:
       content: String,
       x: Double,
       y: Double,
-      fontSize: Double = 12.0,
+      fontSize: FontSize = 12.px,
       fontFamily: String = "sans-serif",
       colour: String = "black"
   ): TextOp =
-    TextOp(content, x, y, FontSpec(fontFamily, fontSize), colour, Alignment.Left)
+    TextOp(
+      content,
+      x,
+      y,
+      FontSpec(fontFamily, fontSize),
+      colour,
+      Alignment.Left,
+      TextBaseline.Alphabetic
+    )
 
   def rect(
       x: Double,
