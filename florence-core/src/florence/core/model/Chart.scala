@@ -36,5 +36,7 @@ enum LineData:
   case GenericData[A](data: Vector[A], x: A => Double, y: A => Double)
 
 enum Axis:
-  case LinearScale(label: String, min: Option[Double], max: Option[Double])
-  case CategoryScale(label: String, categories: Option[Vector[String]] = None)
+  val label: String
+
+  case LinearScale(override val label: String, min: Option[Double], max: Option[Double])
+  case CategoryScale(override val label: String, categories: NonEmptyVector[String])

@@ -42,6 +42,9 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
     */
   private val componentGap = 5.0
 
+  private val defaultAxisLabelFont     = FontSpec("sans-serif", 12.px, "normal")
+  private val defaultAxisTickLabelFont = FontSpec("sans-serif", 10.px, "normal")
+
   def interpretLineChart(
       chart: LineChart,
       style: LineChartStyle = LineChartStyle()
@@ -103,7 +106,7 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
         (min.getOrElse(dataMin), max.getOrElse(dataMax))
       case Axis.CategoryScale(_, categories) =>
         // Axis padding: extra 5% on both sides of the axis
-        val categoryCount = categories.map(_.size).getOrElse(0)
+        val categoryCount = categories.toVector.size
         val padding       = Math.max(0.5, categoryCount * 0.05)
         (1.0 - padding, categoryCount + padding)
 
@@ -190,26 +193,15 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
       LineStyle(yAxisColour, yAxisWidth)
     )
 
-    val xLabelFont = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 12.px, "normal"))
-    val yLabelFont = style.yAxis.labelFont.getOrElse(FontSpec("sans-serif", 12.px, "normal"))
-
-    val xAxisLabel = chart.xAxis match
-      case Axis.LinearScale(label, _, _) => label
-      case Axis.CategoryScale(label, _)  => label
-
-    val yAxisLabel = chart.yAxis match
-      case Axis.LinearScale(label, _, _) => label
-      case Axis.CategoryScale(label, _)  => label
-
     val xOrigin = setup.margins.left                  // x-position of the origin of the plot
     val yOrigin = setup.height - setup.margins.bottom // y-position of the origin of the plot
 
     result += TextOp(
-      xAxisLabel,
+      chart.xAxis.label,
       xOrigin + setup.plotWidth / 2,
       // accounts for the tick marks and tick label sizes with their gaps in between
       yOrigin + tickMarkLength + componentGap + maxXLabelHeight + componentGap,
-      xLabelFont,
+      style.xAxis.labelFont.getOrElse(defaultAxisLabelFont),
       xAxisColour,
       Alignment.Center,
       TextBaseline.Hanging
@@ -219,10 +211,10 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
     result += GroupOp(
       operations = List(
         TextOp(
-          yAxisLabel,
+          chart.yAxis.label,
           0,
           0,
-          yLabelFont,
+          style.yAxis.labelFont.getOrElse(defaultAxisLabelFont),
           yAxisColour,
           Alignment.Center,
           TextBaseline.Bottom
@@ -262,10 +254,8 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
       result: mutable.ReusableBuilder[DrawOp, Vector[DrawOp]]
   ): Double =
     chart.xAxis match
-      case Axis.CategoryScale(_, Some(categories)) =>
-        drawCategoricalXAxis(categories, setup, style, result)
-      case Axis.CategoryScale(_, None) =>
-        drawAutoCategoricalXAxis(setup, style, result)
+      case Axis.CategoryScale(_, categories) =>
+        drawCategoricalXAxis(categories.toVector, setup, style, result)
       case Axis.LinearScale(_, _, _) =>
         drawNumericXAxis(setup, style, result)
   end drawXAxisElements
@@ -283,7 +273,7 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
     val xGridColour = style.xAxis.gridLineColour.getOrElse("#e0e0e0")
     val xGridWidth  = style.xAxis.gridLineWidth.getOrElse(1.0)
     val xGridDash   = style.xAxis.gridLineDash
-    val labelFont   = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.px, "normal"))
+    val labelFont   = style.xAxis.labelFont.getOrElse(defaultAxisTickLabelFont)
 
     var maxXLabelHeight = 0.0
     for i <- categories.indices do
@@ -293,49 +283,6 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
       drawVerticalTickMark(x, y, tickMarkLength, xAxisColour, xAxisWidth, result)
       drawVerticalGridLine(x, setup.margins.top, y, xGridColour, xGridWidth, xGridDash, result)
       val labelText = categories(i)
-      maxXLabelHeight = maxXLabelHeight.max(textMeasurer.measureHeight(labelText, labelFont))
-      drawLabel(
-        labelText,
-        x,
-        tickLabelYPos,
-        labelFont,
-        xAxisColour,
-        Alignment.Center,
-        TextBaseline.Hanging, // top of the label text is at (x, tickLabelYPos)
-        result
-      )
-    maxXLabelHeight
-
-  /** Draws x-axis tick marks and labels for a categorical scale, and returns the maximum tick label height in pixels
-    */
-  private def drawAutoCategoricalXAxis(
-      setup: ChartSetup,
-      style: LineChartStyle,
-      result: mutable.ReusableBuilder[DrawOp, Vector[DrawOp]]
-  ): Double =
-    val xAxisColour = style.xAxis.lineColour.getOrElse("black")
-    val xAxisWidth  = style.xAxis.lineWidth.getOrElse(2.0)
-    val xGridColour = style.xAxis.gridLineColour.getOrElse("#e0e0e0")
-    val xGridWidth  = style.xAxis.gridLineWidth.getOrElse(1.0)
-    val xGridDash   = style.xAxis.gridLineDash
-    val labelFont   = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.px, "normal"))
-
-    /** humanFriendlyTickCount is computed with respect to the font size of the tick labels.
-      * All tick labels within this method are part of the sequence: "0", "1", ..., (numTicks - 1).toString
-      *
-      * This is why measure the font size as the height of a single number from this sequence
-      */
-    val labelFontSize = textMeasurer.measureHeight("1", labelFont)
-    val numTicks      = humanFriendlyTickCount(setup.plotWidth, labelFontSize)
-
-    var maxXLabelHeight = 0.0
-    for i <- 0 until numTicks do
-      val x             = setup.margins.left + i * setup.plotWidth / (numTicks - 1).max(1)
-      val y             = setup.height - setup.margins.bottom // y-position of the axis line
-      val tickLabelYPos = y + tickMarkLength + componentGap   // y-position of the tick label
-      drawVerticalTickMark(x, y, tickMarkLength, xAxisColour, xAxisWidth, result)
-      drawVerticalGridLine(x, setup.margins.top, y, xGridColour, xGridWidth, xGridDash, result)
-      val labelText = (i + 1).toString
       maxXLabelHeight = maxXLabelHeight.max(textMeasurer.measureHeight(labelText, labelFont))
       drawLabel(
         labelText,
@@ -361,7 +308,7 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
     val xGridColour = style.xAxis.gridLineColour.getOrElse("#e0e0e0")
     val xGridWidth  = style.xAxis.gridLineWidth.getOrElse(1.0)
     val xGridDash   = style.xAxis.gridLineDash
-    val labelFont   = style.xAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.px, "normal"))
+    val labelFont   = style.xAxis.labelFont.getOrElse(defaultAxisTickLabelFont)
     val range       = setup.xMax - setup.xMin
     val step        = humanFriendlyStep(range / 10.0)
     val start       = Math.ceil(setup.xMin / step) * step
@@ -402,7 +349,7 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
     val yGridColour = style.yAxis.gridLineColour.getOrElse("#e0e0e0")
     val yGridWidth  = style.yAxis.gridLineWidth.getOrElse(1.0)
     val yGridDash   = style.yAxis.gridLineDash
-    val labelFont   = style.yAxis.labelFont.getOrElse(FontSpec("sans-serif", 10.px, "normal"))
+    val labelFont   = style.yAxis.labelFont.getOrElse(defaultAxisTickLabelFont)
     val range       = setup.yMax - setup.yMin
     val step        = humanFriendlyStep(range / 5.0)
     val start       = Math.ceil(setup.yMin / step) * step
@@ -439,13 +386,6 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
       )
     maxLabelWidth
   end drawYAxisElements
-
-  private def humanFriendlyTickCount(availableWidth: Double, fontSize: Double): Int =
-    val minTickSpacing  = fontSize * 5 // 5 font widths of space
-    val maxTicks        = Math.max(2, Math.floor(availableWidth / minTickSpacing).toInt)
-    val cappedTickCount = Math.min(20, maxTicks)
-    val niceTickCounts  = Vector(2, 3, 4, 5, 6, 8, 10, 12, 15, 20)
-    niceTickCounts.filter(_ <= cappedTickCount).lastOption.getOrElse(2)
 
   private def drawVerticalTickMark(
       x: Double,
