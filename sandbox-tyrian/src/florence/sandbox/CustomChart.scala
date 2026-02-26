@@ -3,7 +3,6 @@ package florence.sandbox
 import org.scalajs.dom.HTMLCanvasElement
 
 import florence.*
-import florence.core.model.NonEmptyVector
 import florence.instances.given
 
 object CustomChart:

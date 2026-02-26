@@ -22,7 +22,6 @@ import org.scalajs.dom
 import org.scalajs.dom.{HTMLCanvasElement, document}
 
 import florence.*
-import florence.core.model.NonEmptyVector
 import florence.instances.given
 
 object Example:

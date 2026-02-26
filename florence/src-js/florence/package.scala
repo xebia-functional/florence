@@ -32,6 +32,7 @@ export florence.core.model.styling.LegendStyle
 export florence.core.model.styling.LineSeriesStyle
 export florence.core.model.styling.WithCommonProps
 export florence.core.model.styling.WithCommonProps.*
+export florence.core.model.NonEmptyVector
 
 // dsl exports
 export florence.core.dsl.ChartDsl.*
