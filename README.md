@@ -88,7 +88,7 @@ styledChart.renderAtCanvasSize(canvas.getContext2D())
 
 ```scala
 val chart = lineChart("My Chart")
-  .withXAxis(Axis.CategoryScale("Month", categories = Some(Vector("Jan", "Feb", "Mar", "Apr"))))
+  .withXAxis(Axis.CategoryScale("Month", categories = Some(NonEmptyVector("Jan", "Feb", "Mar", "Apr"))))
   .withYAxis(Axis.LinearScale("Value", Some(0.0), Some(100.0)))
 ```
 
