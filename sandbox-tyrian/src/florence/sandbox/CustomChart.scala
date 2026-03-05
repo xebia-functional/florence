@@ -7,6 +7,8 @@ import florence.instances.given
 
 object CustomChart:
 
+  val months = NonEmptyVector("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12")
+
   val chart =
     lineChart(
       "Heathrow Min & Max Temps (2023–2025)",
@@ -17,12 +19,7 @@ object CustomChart:
       pointsSeries("TMax 2025", WeatherData.tmax2025*),
       pointsSeries("TMin 2025", WeatherData.tmin2025*)
     )
-      .withXAxis(
-        Axis.CategoryScale(
-          "Month",
-          categories = Some(Vector("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"))
-        )
-      )
+      .withXAxis(Axis.CategoryScale("Month", categories = months))
       .withYAxis(Axis.LinearScale("Temperature (°C)", None, None))
 
   val style = lineChartStyle()
