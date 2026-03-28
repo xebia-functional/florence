@@ -29,39 +29,85 @@ object Chart:
   object LineChart:
     type AnyChart = LineChart[?, ?]
 
+/** A LineSeries is a function from [[Dom]] to [[Range]], that is, a set of pairs of type (Dom, Range)
+  */
 final case class LineSeries[Dom, Range](
     label: String,
     data: Vector[(Dom, Range)]
 )(using val domain: Domain[Dom], val range: Domain[Range]):
   lazy val (domainValues, rangeValues) = data.unzip
 
-  /** Returns the actual numeric positions of each data point
+  /** Returns the numeric positions of each data point in the chart
     */
-  lazy val getSeriesPoints: Vector[(Double, Double)] =
-    getDomainPositions(domain, domainValues).zip(getDomainPositions(range, rangeValues))
+  def getSeriesPoints(
+      xAxis: Axis[Dom],
+      yAxis: Axis[Range]
+  ): Vector[(Double, Double)] =
+    data.flatMap { (x, y) =>
+      for
+        xpos <- getAxisPosition(xAxis, x)
+        ypos <- getAxisPosition(yAxis, y)
+      yield (xpos, ypos)
+    }
 
-  private def getDomainPositions[Type](domain: Domain[Type], values: Vector[Type]): Vector[Double] =
+  /** Map the given [[value]] to a numeric position on the [[axis]]. Depending on the axis' constraints, a data point that exists in the [[LineSeries]]
+    * might not be visible in the chart; for example, if a data point is outside of the range specified by the [[Axis.LinearScale]], we should exclude it
+    */
+  private def getAxisPosition[Type](
+      axis: Axis[Type],
+      value: Type
+  )(using domain: Domain[Type]): Option[Double] =
     domain match
-      case Domain.Reals(eq)   => eq.substituteCo(values)
-      case Domain.Discrete(_) => Vector.range(1, values.size + 1).map(_.toDouble)
+      case Domain.Reals(eq) =>
+        getNumericalAxisPosition(eq.substituteCo(axis), eq(value))
 
-enum Axis[Type]:
-  val label: String
+      case Domain.Discrete(eq) =>
+        getCategoricalAxisPosition(eq.substituteCo(axis), eq(value))
 
-  case LinearScale(
+  private def getNumericalAxisPosition(axis: Axis[Double], value: Double): Option[Double] =
+    axis match
+      case axis: Axis.LinearScale =>
+        Option.when(axis.isInRange(value))(value)
+
+  private def getCategoricalAxisPosition(axis: Axis[String], value: String): Option[Double] =
+    axis match
+      case axis: Axis.CategoryScale =>
+        axis.positionByCategory.get(value).map(_.toDouble)
+
+/** Represents a constraint over the values on an Axis of the Chart
+  */
+sealed trait Axis[Type]:
+  def label: String
+
+  def withLabel(newLabel: String): Axis[Type]
+
+object Axis:
+
+  type AnyAxis = Axis[?]
+
+  /** Constrains the axis values using an inclusive range [min, max]
+    */
+  final case class LinearScale(
       override val label: String,
       min: Option[Double],
       max: Option[Double]
-  ) extends Axis[Double]
+  ) extends Axis[Double]:
+    override def withLabel(newLabel: String): Axis[Double] =
+      this.copy(label = newLabel)
 
-  case CategoryScale(
+    def isInRange(x: Double): Boolean =
+      min.fold(true)(_ <= x) && max.fold(true)(_ >= x)
+
+  /** Constrains the axis of a Discrete Chart to the given sequence of [[categories]]. This means that the chart
+    * will only show the data points that are contained within this sequence (even if the original [[LineSeries]] had more categories),
+    * and the order in which the categories are laid on the axis will be the same as the order from the [[categories]] sequence (from left to right)
+    */
+  final case class CategoryScale(
       override val label: String,
       categories: Vector[String]
-  ) extends Axis[String]
+  ) extends Axis[String]:
+    lazy val positionByCategory: Map[String, Int] =
+      categories.lazyZip(1 to categories.size).toMap
 
-  def withLabel(newLabel: String): Axis[Type] = this match
-    case axis: LinearScale   => axis.copy(label = newLabel)
-    case axis: CategoryScale => axis.copy(label = newLabel)
-
-object Axis:
-  type AnyAxis = Axis[?]
+    override def withLabel(newLabel: String): Axis[String] =
+      this.copy(label = newLabel)

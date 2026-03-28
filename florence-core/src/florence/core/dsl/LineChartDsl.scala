@@ -59,12 +59,12 @@ object LineChartDsl:
     *
     *     List("Mon", "Tue", "Wed", "Tue", "Mon", "Thu", "Sat")
     *
-    * The order that we show in the axis is:
+    * The order in which we show them in the axis is:
     *
     *     List("Mon", "Tue", "Wed", "Thu", "Sat").
     *
-    * Since the user can specify multiple line series, we traverse all the series in the same order that the user specified, and we yield a single axis specification.
-    * For example, if the user specified the following sequence of series:
+    * Since the user can specify multiple line series, we traverse all the series in the same order that the user wrote, and we yield a single axis specification.
+    * For example, if the user created the following sequence of series:
     *
     *      series = List(List("Mon" -> 1.0, "Tue" -> 2.0, "Mon" -> 3.0, "Fri" -> 4.0), List("Sat" -> 5.0, "Sun" -> 10.0), List("Thu" -> 6.0, "Mon" -> 12.0, "Sat" -> 5.0))
     *
@@ -72,7 +72,7 @@ object LineChartDsl:
     *
     *      List("Mon", "Tue", "Fri", "Sat", "Sun", "Thu")
     *
-    * The user can still manually build a [[Axis.CategoryScale]] to specify the order in which the labels should appear in the axis
+    * The user can still manually build a [[Axis.CategoryScale]] to specify the order in which the labels should appear on the axis
     */
   private def defaultCategoricalAxis(
       label: String,

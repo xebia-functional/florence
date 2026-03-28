@@ -116,7 +116,7 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
 
   private def calculateDataRanges(chart: LineChart.AnyChart): (Double, Double, Double, Double) =
     if chart.series.isEmpty then return (0.0, 100.0, 0.0, 100.0)
-    val allPoints = chart.series.flatMap(_.getSeriesPoints)
+    val allPoints = chart.series.flatMap(_.getSeriesPoints(chart.xAxis, chart.yAxis))
     if allPoints.isEmpty then return (0.0, 100.0, 0.0, 100.0)
     val xValues = allPoints.map(_._1)
     val yValues = allPoints.map(_._2)
@@ -504,7 +504,7 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
         case LineType.Dashed  => Some(List(6.0, 2.0))
         case LineType.Dotted  => Some(List(2.0, 2.0))
         case LineType.DashDot => Some(List(6.0, 2.0, 2.0, 2.0))
-      val points = series.getSeriesPoints
+      val points = series.getSeriesPoints(chart.xAxis, chart.yAxis)
       val screenPoints = points.map { case (x, y) =>
         (setup.transformX(x), setup.transformY(y))
       }
