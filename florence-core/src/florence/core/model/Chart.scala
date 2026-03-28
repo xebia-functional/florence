@@ -31,10 +31,10 @@ object Chart:
 
 /** A LineSeries is a function from [[Dom]] to [[Range]], that is, a set of pairs of type (Dom, Range)
   */
-final case class LineSeries[Dom, Range](
+final case class LineSeries[Dom: Domain as domain, Range: Domain as range](
     label: String,
     data: Vector[(Dom, Range)]
-)(using val domain: Domain[Dom], val range: Domain[Range]):
+):
   lazy val (domainValues, rangeValues) = data.unzip
 
   /** Returns the numeric positions of each data point in the chart
@@ -53,10 +53,10 @@ final case class LineSeries[Dom, Range](
   /** Map the given [[value]] to a numeric position on the [[axis]]. Depending on the axis' constraints, a data point that exists in the [[LineSeries]]
     * might not be visible in the chart; for example, if a data point is outside of the range specified by the [[Axis.LinearScale]], we should exclude it
     */
-  private def getAxisPosition[Type](
+  private def getAxisPosition[Type: Domain as domain](
       axis: Axis[Type],
       value: Type
-  )(using domain: Domain[Type]): Option[Double] =
+  ): Option[Double] =
     domain match
       case Domain.Reals(eq) =>
         getNumericalAxisPosition(eq.substituteCo(axis), eq(value))

@@ -23,10 +23,10 @@ import florence.core.model.Chart.LineChart
 
 object LineChartDsl:
 
-  def lineChart[Dom, Range](
+  def lineChart[Dom: Domain as domain, Range: Domain as range](
       title: String,
       series: LineSeries[Dom, Range]*
-  )(using domain: Domain[Dom], range: Domain[Range]): LineChart[Dom, Range] =
+  ): LineChart[Dom, Range] =
     LineChart(
       title = Some(title),
       series = series.toVector,
@@ -112,10 +112,10 @@ object LineChartDsl:
     def addSeries(line: LineSeries[Dom, Range]): LineChart[Dom, Range] =
       chart.copy(series = chart.series :+ line)
 
-  def pointsSeries[Dom, Range](
+  def pointsSeries[Dom: Domain, Range: Domain](
       label: String,
       points: (Dom, Range)*
-  )(using Domain[Dom], Domain[Range]): LineSeries[Dom, Range] =
+  ): LineSeries[Dom, Range] =
     LineSeries(label, points.toVector)
 
   def functionPlotSeries(
