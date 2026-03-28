@@ -18,25 +18,50 @@ package florence.core.model
 
 enum Chart:
 
-  case LineChart(
+  case LineChart[Dom, Range](
       title: Option[String],
-      series: Vector[LineSeries],
-      xAxis: Axis,
-      yAxis: Axis
+      series: Vector[LineSeries[Dom, Range]],
+      xAxis: Axis[Dom],
+      yAxis: Axis[Range]
   )
 
-final case class LineSeries(
+object Chart:
+  object LineChart:
+    type AnyChart = LineChart[?, ?]
+
+final case class LineSeries[Dom, Range](
     label: String,
-    lineData: LineData
-)
+    data: Vector[(Dom, Range)]
+)(using val domain: Domain[Dom], val range: Domain[Range]):
+  lazy val (domainValues, rangeValues) = data.unzip
 
-enum LineData:
-  case Points(data: Vector[(Double, Double)])
-  case FunctionPlot(f: Double => Double, start: Double, end: Double, sampleSize: Int)
-  case GenericData[A](data: Vector[A], x: A => Double, y: A => Double)
+  /** Returns the actual numeric positions of each data point
+    */
+  lazy val getSeriesPoints: Vector[(Double, Double)] =
+    getDomainPositions(domain, domainValues).zip(getDomainPositions(range, rangeValues))
 
-enum Axis:
+  private def getDomainPositions[Type](domain: Domain[Type], values: Vector[Type]): Vector[Double] =
+    domain match
+      case Domain.Reals(eq)   => eq.substituteCo(values)
+      case Domain.Discrete(_) => Vector.range(1, values.size + 1).map(_.toDouble)
+
+enum Axis[Type]:
   val label: String
 
-  case LinearScale(override val label: String, min: Option[Double], max: Option[Double])
-  case CategoryScale(override val label: String, categories: NonEmptyVector[String])
+  case LinearScale(
+      override val label: String,
+      min: Option[Double],
+      max: Option[Double]
+  ) extends Axis[Double]
+
+  case CategoryScale(
+      override val label: String,
+      categories: Vector[String]
+  ) extends Axis[String]
+
+  def withLabel(newLabel: String): Axis[Type] = this match
+    case axis: LinearScale   => axis.copy(label = newLabel)
+    case axis: CategoryScale => axis.copy(label = newLabel)
+
+object Axis:
+  type AnyAxis = Axis[?]

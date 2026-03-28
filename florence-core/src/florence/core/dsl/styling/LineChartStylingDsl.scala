@@ -22,7 +22,7 @@ import florence.core.model.styling.ChartStyle.LineChartStyle
 
 object LineChartStylingDsl:
 
-  type StyledLineChart = StyledChart[LineChart, LineChartStyle]
+  type StyledLineChart[Dom, Range] = StyledChart[LineChart[Dom, Range], LineChartStyle]
 
   def lineChartStyle(
       commonProps: CommonStyleProps = CommonStyleProps(),

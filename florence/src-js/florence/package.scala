@@ -19,7 +19,6 @@ package florence
 // model exports
 export florence.core.model.Chart
 export florence.core.model.LineSeries
-export florence.core.model.LineData
 export florence.core.model.Axis
 export florence.core.model.shared.StyleTypes.*
 export florence.core.model.styling.ChartStyle
