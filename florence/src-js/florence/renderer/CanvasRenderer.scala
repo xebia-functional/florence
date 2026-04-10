@@ -209,7 +209,7 @@ object CanvasRendererExtensions:
       val drw = interpreter.interpret(styled.copy(style = s2))
       CanvasRenderer.render(drw, ctx)
 
-  extension (chart: LineChart.AnyChart)
+  extension [Dom, Range](chart: LineChart[Dom, Range])
 
     /** Redraw with style at canvas size
       * Same as renderAtCanvasSize but takes chart and style separately
@@ -225,7 +225,7 @@ object CanvasRendererExtensions:
       * Same as renderAtCanvasSize but takes chart and style separately
       */
     private def renderAtCanvasSizeWithImpl(style: LineChartStyle, ctx: CanvasRenderingContext2D)(
-        using interpreter: Interpreter[(LineChart.AnyChart, LineChartStyle), Drawing]
+        using interpreter: Interpreter[(LineChart[Dom, Range], LineChartStyle), Drawing]
     ): Unit =
       val cw = ctx.canvas.width
       val ch = ctx.canvas.height

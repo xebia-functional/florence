@@ -667,17 +667,17 @@ end LineChartInterpreter
 
 object LineChartInterpreterInstances:
 
-  given lineChartInterpreter(using
+  given lineChartInterpreter[Dom, Range](using
       textMeasurer: TextMeasurer
-  ): Interpreter[LineChart.AnyChart, Drawing] with
-    def interpret(chart: LineChart.AnyChart): Drawing =
+  ): Interpreter[LineChart[Dom, Range], Drawing] with
+    def interpret(chart: LineChart[Dom, Range]): Drawing =
       LineChartInterpreter(textMeasurer).interpretLineChart(chart)
 
-  given lineChartWithStyleInterpreter(using
+  given lineChartWithStyleInterpreter[Dom, Range](using
       textMeasurer: TextMeasurer
-  ): Interpreter[(LineChart.AnyChart, LineChartStyle), Drawing] with
+  ): Interpreter[(LineChart[Dom, Range], LineChartStyle), Drawing] with
 
-    def interpret(args: (LineChart.AnyChart, LineChartStyle)): Drawing =
+    def interpret(args: (LineChart[Dom, Range], LineChartStyle)): Drawing =
       val (chart, style) = args
       LineChartInterpreter(textMeasurer).interpretLineChart(chart, style)
 
