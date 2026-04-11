@@ -175,7 +175,7 @@ object CanvasRendererExtensions:
   import florence.core.model.Chart.LineChart
   import florence.core.model.styling.ChartStyle.LineChartStyle
 
-  extension (styled: StyledChart[LineChart, LineChartStyle])
+  extension [Dom, Range](styled: StyledChart[LineChart[Dom, Range], LineChartStyle])
 
     /** Redraw at canvas width and height
       * No distortion
@@ -193,7 +193,7 @@ object CanvasRendererExtensions:
       * Layout recomputed for ticks labels and margins
       */
     private def renderAtCanvasSizeImpl(ctx: CanvasRenderingContext2D)(using
-        interpreter: Interpreter[StyledChart[LineChart, LineChartStyle], Drawing]
+        interpreter: Interpreter[StyledChart[LineChart[Dom, Range], LineChartStyle], Drawing]
     ): Unit =
       val cw = ctx.canvas.width
       val ch = ctx.canvas.height
@@ -209,7 +209,7 @@ object CanvasRendererExtensions:
       val drw = interpreter.interpret(styled.copy(style = s2))
       CanvasRenderer.render(drw, ctx)
 
-  extension (chart: LineChart)
+  extension [Dom, Range](chart: LineChart[Dom, Range])
 
     /** Redraw with style at canvas size
       * Same as renderAtCanvasSize but takes chart and style separately
@@ -225,7 +225,7 @@ object CanvasRendererExtensions:
       * Same as renderAtCanvasSize but takes chart and style separately
       */
     private def renderAtCanvasSizeWithImpl(style: LineChartStyle, ctx: CanvasRenderingContext2D)(
-        using interpreter: Interpreter[(LineChart, LineChartStyle), Drawing]
+        using interpreter: Interpreter[(LineChart[Dom, Range], LineChartStyle), Drawing]
     ): Unit =
       val cw = ctx.canvas.width
       val ch = ctx.canvas.height

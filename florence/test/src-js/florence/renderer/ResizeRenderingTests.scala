@@ -49,7 +49,7 @@ class ResizeRenderingTests extends FunSuite:
       .withXAxis(base.xAxis.copy(gridLines = false))
       .withYAxis(base.yAxis.copy(gridLines = false))
 
-  private def simpleChart: Chart.LineChart =
+  private def simpleChart: Chart.LineChart[Double, Double] =
     lineChart("t", pointsSeries("s", (1.0, 1.0), (2.0, 2.0)))
 
   test("axes respect resized width/height at 600x200"):

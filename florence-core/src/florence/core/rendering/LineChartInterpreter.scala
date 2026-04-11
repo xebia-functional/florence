@@ -46,7 +46,7 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
   private val defaultAxisTickLabelFont = FontSpec("sans-serif", 10.px, "normal")
 
   def interpretLineChart(
-      chart: LineChart,
+      chart: LineChart.AnyChart,
       style: LineChartStyle = LineChartStyle()
   ): Drawing =
     val chartSetup = setupChart(chart, style)
@@ -86,7 +86,7 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
       height - margins.bottom - (y - yMin) * plotHeight / (yMax - yMin)
 
   private def setupChart(
-      chart: LineChart,
+      chart: LineChart.AnyChart,
       style: LineChartStyle
   ): ChartSetup =
     val width                                    = style.width
@@ -99,20 +99,24 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
     val (yMin, yMax)                             = computeAxisRange(chart.yAxis, dataYMin, dataYMax)
     ChartSetup(width, height, margins, xMin, xMax, yMin, yMax, plotWidth, plotHeight)
 
-  private def computeAxisRange(axis: Axis, dataMin: Double, dataMax: Double): (Double, Double) =
+  private def computeAxisRange(
+      axis: Axis.AnyAxis,
+      dataMin: Double,
+      dataMax: Double
+  ): (Double, Double) =
     axis match
       case Axis.LinearScale(_, min, max) =>
         // Use provided min/max or fallback to data ranges
         (min.getOrElse(dataMin), max.getOrElse(dataMax))
       case Axis.CategoryScale(_, categories) =>
         // Axis padding: extra 5% on both sides of the axis
-        val categoryCount = categories.toVector.size
+        val categoryCount = categories.size
         val padding       = Math.max(0.5, categoryCount * 0.05)
         (1.0 - padding, categoryCount + padding)
 
-  private def calculateDataRanges(chart: LineChart): (Double, Double, Double, Double) =
+  private def calculateDataRanges(chart: LineChart.AnyChart): (Double, Double, Double, Double) =
     if chart.series.isEmpty then return (0.0, 100.0, 0.0, 100.0)
-    val allPoints = chart.series.flatMap(getSeriesPoints)
+    val allPoints = chart.series.flatMap(_.getSeriesPoints(chart.xAxis, chart.yAxis))
     if allPoints.isEmpty then return (0.0, 100.0, 0.0, 100.0)
     val xValues = allPoints.map(_._1)
     val yValues = allPoints.map(_._2)
@@ -141,7 +145,7 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
     Vector(ClearOp(Some(bgColour)))
 
   private def drawTitle(
-      chart: LineChart,
+      chart: LineChart.AnyChart,
       setup: ChartSetup,
       style: LineChartStyle
   ): Vector[DrawOp] =
@@ -165,7 +169,7 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
     result.result()
 
   private def drawAxes(
-      chart: LineChart,
+      chart: LineChart.AnyChart,
       setup: ChartSetup,
       style: LineChartStyle,
       maxXLabelHeight: Double,
@@ -234,7 +238,7 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
   end drawAxes
 
   private def drawGridAndLabels(
-      chart: LineChart,
+      chart: LineChart.AnyChart,
       setup: ChartSetup,
       style: LineChartStyle
   ): (maxXLabelHeight: Double, maxYLabelWidth: Double, operations: Vector[DrawOp]) =
@@ -248,14 +252,14 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
   /** Draws x-axis tick marks and labels, and returns the maximum tick label height in pixels
     */
   private def drawXAxisElements(
-      chart: LineChart,
+      chart: LineChart.AnyChart,
       setup: ChartSetup,
       style: LineChartStyle,
       result: mutable.ReusableBuilder[DrawOp, Vector[DrawOp]]
   ): Double =
     chart.xAxis match
       case Axis.CategoryScale(_, categories) =>
-        drawCategoricalXAxis(categories.toVector, setup, style, result)
+        drawCategoricalXAxis(categories, setup, style, result)
       case Axis.LinearScale(_, _, _) =>
         drawNumericXAxis(setup, style, result)
   end drawXAxisElements
@@ -485,7 +489,7 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
     else 10 * orderOfMagnitude // declutter labels
 
   private def drawSeries(
-      chart: LineChart,
+      chart: LineChart.AnyChart,
       setup: ChartSetup,
       style: LineChartStyle
   ): Vector[DrawOp] =
@@ -500,7 +504,7 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
         case LineType.Dashed  => Some(List(6.0, 2.0))
         case LineType.Dotted  => Some(List(2.0, 2.0))
         case LineType.DashDot => Some(List(6.0, 2.0, 2.0, 2.0))
-      val points = getSeriesPoints(series)
+      val points = series.getSeriesPoints(chart.xAxis, chart.yAxis)
       val screenPoints = points.map { case (x, y) =>
         (setup.transformX(x), setup.transformY(y))
       }
@@ -596,7 +600,7 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
         Vector.empty
 
   private def drawLegend(
-      chart: LineChart,
+      chart: LineChart.AnyChart,
       setup: ChartSetup,
       style: LineChartStyle
   ): Vector[DrawOp] =
@@ -659,32 +663,26 @@ final class LineChartInterpreter(textMeasurer: TextMeasurer):
     result.result()
   end drawLegend
 
-  private def getSeriesPoints(series: LineSeries): Vector[(Double, Double)] =
-    series.lineData match
-      case LineData.Points(data) => data
-      case LineData.FunctionPlot(f, start, end, sampleSize) =>
-        val step = (end - start) / (sampleSize - 1).max(1)
-        (0 until sampleSize).map(i => (start + i * step, f(start + i * step))).toVector
-      case LineData.GenericData(data, x, y) =>
-        data.map(d => (x(d), y(d)))
 end LineChartInterpreter
 
 object LineChartInterpreterInstances:
 
-  given lineChartInterpreter(using textMeasurer: TextMeasurer): Interpreter[LineChart, Drawing] with
-    def interpret(chart: LineChart): Drawing =
+  given lineChartInterpreter[Dom, Range](using
+      textMeasurer: TextMeasurer
+  ): Interpreter[LineChart[Dom, Range], Drawing] with
+    def interpret(chart: LineChart[Dom, Range]): Drawing =
       LineChartInterpreter(textMeasurer).interpretLineChart(chart)
 
-  given lineChartWithStyleInterpreter(using
+  given lineChartWithStyleInterpreter[Dom, Range](using
       textMeasurer: TextMeasurer
-  ): Interpreter[(LineChart, LineChartStyle), Drawing] with
+  ): Interpreter[(LineChart[Dom, Range], LineChartStyle), Drawing] with
 
-    def interpret(args: (LineChart, LineChartStyle)): Drawing =
+    def interpret(args: (LineChart[Dom, Range], LineChartStyle)): Drawing =
       val (chart, style) = args
       LineChartInterpreter(textMeasurer).interpretLineChart(chart, style)
 
-  given styledLineChartInterpreter(using
+  given styledLineChartInterpreter[Dom, Range](using
       textMeasurer: TextMeasurer
-  ): Interpreter[StyledLineChart, Drawing] with
-    def interpret(styledChart: StyledLineChart): Drawing =
+  ): Interpreter[StyledLineChart[Dom, Range], Drawing] with
+    def interpret(styledChart: StyledLineChart[Dom, Range]): Drawing =
       LineChartInterpreter(textMeasurer).interpretLineChart(styledChart.chart, styledChart.style)
